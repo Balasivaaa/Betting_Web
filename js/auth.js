@@ -34,12 +34,19 @@ function ensureDemoUser() {
             email: 'demo',
             password: 'demo123',
             wallet: 10000,
+            realWallet: 0,
+            accountMode: 'paper', // 'paper' or 'real'
             positions: [],
             trades: [],
             createdAt: new Date().toISOString()
         });
         saveUsers(users);
     }
+}
+
+function getAccountMode() {
+    const user = getCurrentUser();
+    return user ? (user.accountMode || 'paper') : 'paper';
 }
 
 // Open auth modal
@@ -171,6 +178,8 @@ function handleSignup(e) {
         email: email,
         password: password,
         wallet: 10000,
+        realWallet: 0,
+        accountMode: 'paper',
         positions: [],
         trades: [],
         createdAt: new Date().toISOString()
@@ -204,7 +213,6 @@ function logout() {
     closeUserDropdown();
 }
 
-// Sync current user data back to users array
 function syncUserData() {
     const current = getCurrentUser();
     if (!current) return;
@@ -216,16 +224,35 @@ function syncUserData() {
     }
 }
 
+function setAccountMode(mode) {
+    const user = getCurrentUser();
+    if (!user) return;
+    user.accountMode = mode;
+    saveCurrentUser(user);
+    syncUserData();
+    updateNavForUser();
+    navigateTo(window.currentPage);
+    showToast(`Switched to ${mode.toUpperCase()} account`, 'info');
+}
+
 // Update nav based on auth state
 function updateNavForUser() {
     const navRight = document.getElementById('navRight');
     const user = getCurrentUser();
 
     if (user) {
+        const mode = getAccountMode();
         const initials = user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+        const balance = mode === 'real' ? (user.realWallet || 0) : user.wallet;
+        const colorClass = mode === 'real' ? 'real' : '';
+
         navRight.innerHTML = `
-            <div class="wallet-badge" id="walletBadge">
-                💰 ₹${Number(user.wallet).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+            <div class="account-toggle">
+                <button class="toggle-btn paper ${mode === 'paper' ? 'active' : ''}" onclick="setAccountMode('paper')">Paper</button>
+                <button class="toggle-btn real ${mode === 'real' ? 'active' : ''}" onclick="setAccountMode('real')">Real</button>
+            </div>
+            <div class="wallet-badge ${colorClass}" id="walletBadge">
+                ${mode === 'real' ? '💳' : '💰'} ₹${Number(balance).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
             </div>
             <div class="user-menu">
                 <button class="user-menu-btn" onclick="toggleUserDropdown()">
@@ -233,6 +260,7 @@ function updateNavForUser() {
                     <span class="user-name-nav">${user.name.split(' ')[0]}</span>
                 </button>
                 <div class="user-dropdown" id="userDropdown">
+                    ${mode === 'real' ? '<button class="user-dropdown-item" onclick="openDepositModal()">💰 Deposit Cash</button>' : ''}
                     <button class="user-dropdown-item" onclick="navigateTo('portfolio'); closeUserDropdown();">💼 Portfolio</button>
                     <button class="user-dropdown-item" onclick="navigateTo('leaderboard'); closeUserDropdown();">🏆 Leaderboard</button>
                     <button class="user-dropdown-item danger" onclick="logout()">🚪 Logout</button>
@@ -272,8 +300,11 @@ function closeDropdownOutside(e) {
 function updateWalletDisplay() {
     const user = getCurrentUser();
     if (!user) return;
+    const mode = getAccountMode();
+    const balance = mode === 'real' ? (user.realWallet || 0) : user.wallet;
     const badge = document.getElementById('walletBadge');
     if (badge) {
-        badge.innerHTML = `💰 ₹${Number(user.wallet).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+        badge.className = `wallet-badge ${mode === 'real' ? 'real' : ''}`;
+        badge.innerHTML = `${mode === 'real' ? '💳' : '💰'} ₹${Number(balance).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
     }
 }

@@ -315,6 +315,67 @@ img { max-width: 100%; }
     transform: translateY(-1px);
 }
 
+/* Account Toggle */
+.account-toggle {
+    display: flex;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-full);
+    padding: 3px;
+    margin-right: 8px;
+}
+
+.toggle-btn {
+    padding: 5px 12px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: var(--transition-fast);
+    color: var(--text-muted);
+}
+
+.toggle-btn.active {
+    background: var(--gradient-primary);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.toggle-btn.real.active {
+    background: var(--gradient-orange);
+}
+
+.wallet-badge.real {
+    background: rgba(255, 159, 67, 0.1);
+    border-color: rgba(255, 159, 67, 0.2);
+    color: var(--accent-orange);
+}
+
+/* Deposit Modal Styles */
+.deposit-btn {
+    margin-top: 12px;
+    width: 100%;
+    background: var(--gradient-orange);
+    color: white;
+}
+
+.stripe-container {
+    margin-top: 20px;
+    padding: 16px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+}
+
+#card-element {
+    padding: 12px;
+}
+
+.payment-status {
+    margin-top: 12px;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
 /* Mobile */
 .mobile-menu-btn {
     display: none;

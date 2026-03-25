@@ -46,7 +46,9 @@ function renderTradeModal(market) {
            </div>`
         : '';
 
-    const insufficientFunds = parseFloat(total) > user.wallet;
+    const mode = getAccountMode();
+    const balance = mode === 'real' ? (user.realWallet || 0) : user.wallet;
+    const insufficientFunds = parseFloat(total) > balance;
 
     body.innerHTML = `
         <div class="trade-market-title">${market.question}</div>
@@ -101,8 +103,8 @@ function renderTradeModal(market) {
             </div>
             ${existingInfo}
             <div class="trade-detail-row">
-                <span class="label">Wallet balance</span>
-                <span class="value">₹${Number(user.wallet).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                <span class="label">${mode === 'real' ? 'Real' : 'Paper'} wallet balance</span>
+                <span class="value">₹${Number(balance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
             </div>
         </div>
 
@@ -148,17 +150,22 @@ function executeTrade(marketId) {
     const market = getMarketById(marketId);
     if (!market) return;
 
-    const price = currentTradeSide === 'yes' ? market.yesPrice : (1 - market.yesPrice);
-    const total = currentTradeShares * price;
+    const mode = getAccountMode();
+    const balance = mode === 'real' ? (user.realWallet || 0) : user.wallet;
 
-    if (total > user.wallet) {
+    if (total > balance) {
         showToast('Insufficient funds!', 'error');
         return;
     }
 
-    // Deduct from wallet
-    user.wallet -= total;
-    user.wallet = Math.round(user.wallet * 100) / 100;
+    // Deduct from appropriate wallet
+    if (mode === 'real') {
+        user.realWallet -= total;
+        user.realWallet = Math.round(user.realWallet * 100) / 100;
+    } else {
+        user.wallet -= total;
+        user.wallet = Math.round(user.wallet * 100) / 100;
+    }
 
     // Check for existing position
     const existingIdx = user.positions.findIndex(p => p.marketId === marketId && p.side === currentTradeSide);

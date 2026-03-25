@@ -79,5 +79,6 @@ function closeMobileMenu() {
 document.addEventListener('DOMContentLoaded', () => {
     ensureDemoUser();
     updateNavForUser();
+    checkPaymentStatus();
     navigateTo('markets');
 });
