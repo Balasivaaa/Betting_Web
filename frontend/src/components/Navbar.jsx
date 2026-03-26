@@ -20,9 +20,14 @@ const Navbar = ({ currentPage, onNavigate }) => {
     return (
         <nav className="navbar">
             <div className="nav-container">
-                <div className="logo" onClick={() => onNavigate('markets')}>
-                    <span className="logo-icon">P</span>
-                    <div className="logo-text">Predi<span className="logo-accent">X</span></div>
+                <div className="nav-left" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <button className="mobile-menu-btn" onClick={() => setIsMobileMenuOpen(true)}>
+                        <Menu size={20} />
+                    </button>
+                    <div className="logo" onClick={() => onNavigate('markets')}>
+                        <span className="logo-icon">P</span>
+                        <div className="logo-text">Predi<span className="logo-accent">X</span></div>
+                    </div>
                 </div>
 
                 <div className="nav-links">
@@ -40,10 +45,6 @@ const Navbar = ({ currentPage, onNavigate }) => {
                 <div className="nav-right">
                     <button className="theme-toggle-btn" onClick={toggleTheme} title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
                         {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-                    </button>
-                    
-                    <button className="mobile-menu-btn" onClick={() => setIsMobileMenuOpen(true)}>
-                        <Menu size={20} />
                     </button>
                     
                     {user ? (
