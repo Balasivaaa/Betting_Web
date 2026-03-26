@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import MarketCard from './MarketCard';
 import { CATEGORIES } from '../utils/mockData';
-import { Search, Loader2 } from 'lucide-react';
+import { Search, Loader2, SlidersHorizontal } from 'lucide-react';
 
 const MarketsGrid = ({ onTrade }) => {
     const [markets, setMarkets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeCategory, setActiveCategory] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
+    const [showFilters, setShowFilters] = useState(false);
     const [error, setError] = useState(null);
 
     useEffect(() => {
@@ -68,9 +69,14 @@ const MarketsGrid = ({ onTrade }) => {
             <div className="markets-hero">
                 <h1>Trade on Your <span className="text-gradient">Conviction</span></h1>
                 <p>The prediction market for everything that matters in India</p>
+                <button className="filter-toggle-btn" onClick={() => setShowFilters(!showFilters)}>
+                    <SlidersHorizontal size={16} />
+                    {showFilters ? 'Hide Filters' : 'Filters'}
+                </button>
             </div>
 
-            <div className="controls-bar">
+            {showFilters && (
+            <div className="controls-bar" style={{ animation: 'fadeSlideDown 0.3s ease' }}>
                 <div className="categories-scroll">
                     {CATEGORIES.map(cat => (
                         <button
@@ -94,6 +100,7 @@ const MarketsGrid = ({ onTrade }) => {
                     />
                 </div>
             </div>
+            )}
 
             <div className="markets-grid">
                 {filteredMarkets.length > 0 ? (
