@@ -31,7 +31,40 @@ const Leaderboard = () => {
         return combined.sort((a, b) => b.roi - a.roi);
     }, [realTraders]);
 
-    if (loading && realTraders.length === 0) return <div style={{ padding: '100px', textAlign: 'center' }}><Loader2 className="animate-spin" /></div>;
+    if (loading && realTraders.length === 0) return (
+        <div className="leaderboard-page fade-in">
+            <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+                <div className="skeleton-line" style={{ width: '200px', height: '28px', margin: '0 auto' }}></div>
+                <div className="skeleton-line" style={{ width: '280px', height: '14px', margin: '12px auto 0' }}></div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', marginBottom: '40px', alignItems: 'flex-end' }}>
+                <div style={{ textAlign: 'center' }}>
+                    <div className="skeleton-circle" style={{ width: '56px', height: '56px', margin: '0 auto 8px' }}></div>
+                    <div className="skeleton-line" style={{ width: '70px', height: '12px' }}></div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                    <div className="skeleton-circle" style={{ width: '72px', height: '72px', margin: '0 auto 8px' }}></div>
+                    <div className="skeleton-line" style={{ width: '80px', height: '14px' }}></div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                    <div className="skeleton-circle" style={{ width: '56px', height: '56px', margin: '0 auto 8px' }}></div>
+                    <div className="skeleton-line" style={{ width: '70px', height: '12px' }}></div>
+                </div>
+            </div>
+            <div className="content-card">
+                <div className="skeleton-line" style={{ width: '100%', height: '44px', borderRadius: '8px 8px 0 0' }}></div>
+                {[1,2,3,4,5,6].map(i => (
+                    <div key={i} style={{ display: 'flex', gap: '16px', padding: '14px 20px', borderBottom: '1px solid var(--border-color)', alignItems: 'center' }}>
+                        <div className="skeleton-line" style={{ width: '28px', height: '16px' }}></div>
+                        <div className="skeleton-circle" style={{ width: '32px', height: '32px' }}></div>
+                        <div className="skeleton-line" style={{ flex: 2, height: '16px' }}></div>
+                        <div className="skeleton-line" style={{ flex: 1, height: '16px' }}></div>
+                        <div className="skeleton-line" style={{ flex: 1, height: '16px' }}></div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
 
     const topThree = leaderboardData.slice(0, 3);
 

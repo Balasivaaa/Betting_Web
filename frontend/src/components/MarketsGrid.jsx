@@ -41,9 +41,32 @@ const MarketsGrid = ({ onTrade }) => {
 
     if (loading) {
         return (
-            <div className="loading-state" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '100px 0' }}>
-                <Loader2 className="animate-spin" size={48} color="var(--primary-color)" />
-                <p style={{ marginTop: '20px', color: 'var(--text-muted)' }}>Loading Markets...</p>
+            <div className="markets-section fade-in">
+                <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+                    <div className="skeleton-line" style={{ width: '320px', height: '32px', margin: '0 auto' }}></div>
+                    <div className="skeleton-line" style={{ width: '240px', height: '16px', margin: '12px auto 0' }}></div>
+                </div>
+                <div className="skeleton-line" style={{ width: '100%', height: '48px', borderRadius: '8px', marginBottom: '24px' }}></div>
+                <div className="markets-grid">
+                    {[1,2,3,4,5,6].map(i => (
+                        <div key={i} className="market-card" style={{ padding: '20px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+                                <div className="skeleton-line" style={{ width: '70px', height: '20px' }}></div>
+                                <div className="skeleton-line" style={{ width: '50px', height: '20px' }}></div>
+                            </div>
+                            <div className="skeleton-line" style={{ width: '100%', height: '18px', marginBottom: '8px' }}></div>
+                            <div className="skeleton-line" style={{ width: '80%', height: '18px', marginBottom: '24px' }}></div>
+                            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+                                <div className="skeleton-line" style={{ flex: 1, height: '52px' }}></div>
+                                <div className="skeleton-line" style={{ flex: 1, height: '52px' }}></div>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
+                                <div className="skeleton-line" style={{ width: '90px', height: '14px' }}></div>
+                                <div className="skeleton-line" style={{ width: '90px', height: '40px', borderRadius: '30px' }}></div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
         );
     }
