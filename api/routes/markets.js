@@ -114,7 +114,7 @@ router.post('/trade', async (req, res) => {
 
         res.json({ 
             message: 'Trade executed successfully', 
-            user: { id: user._id, demoWallet: user.demoWallet, realWallet: user.realWallet, portfolio: user.portfolio } 
+            user: { id: user._id, demoWallet: user.demoWallet, realWallet: user.realWallet, portfolio: user.portfolio, tradeHistory: user.tradeHistory || [] } 
         });
     } catch (error) {
         console.error('Trade Execution Error:', error);
@@ -146,17 +146,22 @@ router.post('/resolve', async (req, res) => {
         const users = await User.find({ "portfolio.marketId": marketId });
         for (let user of users) {
              const positions = user.portfolio.filter(p => p.marketId === marketId);
+             
+             // 1. Calculate and add winnings
              for (const pos of positions) {
-                 if (pos.side === outcome) {
-                     if (pos.accountMode === 'real') {
-                         user.realWallet += pos.shares;
-                     } else {
-                         user.demoWallet += pos.shares;
-                     }
-                 }
-                 user.portfolio = user.portfolio.filter(p => p !== pos);
+                  if (pos.side === outcome) {
+                      if (pos.accountMode === 'real') {
+                          user.realWallet += pos.shares;
+                      } else {
+                          user.demoWallet += pos.shares;
+                      }
+                  }
              }
-             // Update history entries for this market
+
+             // 2. Remove all positions for this market from active portfolio
+             user.portfolio = user.portfolio.filter(p => p.marketId !== marketId);
+
+             // 3. Update history entries for this market
              if (user.tradeHistory && user.tradeHistory.length > 0) {
                  user.tradeHistory = user.tradeHistory.map(h => {
                      if (h.marketId === marketId && h.result === 'pending') {

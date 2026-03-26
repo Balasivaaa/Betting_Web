@@ -54,7 +54,7 @@ router.post('/register', authLimiter, async (req, res) => {
         const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
         res.json({ 
             token, 
-            user: { id: user._id, name: user.name, email: user.email, role: user.role, demoWallet: user.demoWallet, realWallet: user.realWallet, portfolio: user.portfolio, withdrawals: user.withdrawals } 
+            user: { id: user._id, name: user.name, email: user.email, role: user.role, demoWallet: user.demoWallet, realWallet: user.realWallet, portfolio: user.portfolio, withdrawals: user.withdrawals, tradeHistory: user.tradeHistory || [] } 
         });
     } catch (error) {
         console.error('Registration Error:', error.message);
@@ -86,7 +86,7 @@ router.post('/login', authLimiter, async (req, res) => {
         const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
         res.json({ 
             token, 
-            user: { id: user._id, name: user.name, email: user.email, role: user.role, demoWallet: user.demoWallet, realWallet: user.realWallet, portfolio: user.portfolio, withdrawals: user.withdrawals } 
+            user: { id: user._id, name: user.name, email: user.email, role: user.role, demoWallet: user.demoWallet, realWallet: user.realWallet, portfolio: user.portfolio, withdrawals: user.withdrawals, tradeHistory: user.tradeHistory || [] } 
         });
     } catch (error) {
         console.error('Login Error:', error);
@@ -104,7 +104,7 @@ router.get('/me', async (req, res) => {
         if (!user) return res.status(404).json({ error: 'User not found' });
         
         res.json({ 
-            user: { id: user._id, name: user.name, email: user.email, role: user.role, demoWallet: user.demoWallet, realWallet: user.realWallet, portfolio: user.portfolio, withdrawals: user.withdrawals } 
+            user: { id: user._id, name: user.name, email: user.email, role: user.role, demoWallet: user.demoWallet, realWallet: user.realWallet, portfolio: user.portfolio, withdrawals: user.withdrawals, tradeHistory: user.tradeHistory || [] } 
         });
     } catch (error) {
         res.status(401).json({ error: 'Invalid Session' });
