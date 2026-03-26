@@ -101,6 +101,18 @@ input, select, textarea { font-family: inherit; color: var(--text-primary); back
 .user-dropdown-item:last-child { border-bottom: none; }
 .user-dropdown-item:hover { background: var(--bg-primary); }
 
+/* User Dropdown Mode Toggle */
+.mode-toggle-area { padding: 12px 16px; border-bottom: 1px solid var(--border-color); background: var(--bg-secondary); display: flex; justify-content: space-between; align-items: center; }
+.mode-label { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+.mode-switch { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 4px; border-radius: var(--radius-sm); border: 1px solid transparent; transition: background 0.2s; }
+.mode-switch:hover { background: var(--bg-primary); }
+.mode-switch-track { width: 36px; height: 20px; background: var(--border-color); border-radius: 20px; position: relative; transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.mode-switch-track.real { background: var(--accent-green); }
+.mode-switch-track.demo { background: var(--accent-blue); }
+.mode-switch-thumb { width: 14px; height: 14px; background: #ffffff; border-radius: 50%; position: absolute; top: 3px; left: 3px; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+.mode-switch-track.real .mode-switch-thumb { transform: translateX(16px); }
+.mode-name { font-size: 0.8rem; font-weight: 700; color: var(--text-primary); }
+
 /* Mobile Menu */
 .mobile-menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
 .mobile-menu-overlay.open { opacity: 1; pointer-events: auto; }
