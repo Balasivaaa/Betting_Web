@@ -14,7 +14,7 @@ const User = require('../api/models/User');
 const app = express();
 const rootDir = path.resolve(__dirname, '..');
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/bharatx';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/predix';
 console.log('Using MongoDB URI:', MONGODB_URI.split('@')[1] ? 'ATLAS_CLUSTER' : 'LOCAL');
 mongoose.connect(MONGODB_URI)
     .then(() => console.log('✅ MongoDB Connected to:', MONGODB_URI.includes('cluster') ? 'Atlas' : 'Local'))
@@ -110,12 +110,12 @@ app.post('/send-confirmation-email', async (req, res) => {
     }
 
     const mailOptions = {
-        from: `BharatX Prediction Market <${process.env.GMAIL_USER}>`,
+        from: `PrediX Prediction Market <${process.env.GMAIL_USER}>`,
         to: email,
-        subject: '💰 Deposit Successful - BharatX',
+        subject: '💰 Deposit Successful - PrediX',
         html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background-color: #f9f9f9;">
-                <h2 style="color: #4f7df7; text-align: center;">BharatX Receipt</h2>
+                <h2 style="color: #4f7df7; text-align: center;">PrediX Receipt</h2>
                 <p>Hello <strong>${customerName || 'Trader'}</strong>,</p>
                 <p>Your deposit was successful! We've added the funds to your Real Account wallet.</p>
                 <div style="background-color: #ffffff; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #eee;">
@@ -127,7 +127,7 @@ app.post('/send-confirmation-email', async (req, res) => {
                     <a href="${process.env.APP_URL || 'https://' + req.get('host')}" style="background-color: #4f7df7; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Go to Dashboard</a>
                 </p>
                 <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
-                <p style="font-size: 12px; color: #777; text-align: center;">&copy; 2026 BharatX Prediction Market. All rights reserved.</p>
+                <p style="font-size: 12px; color: #777; text-align: center;">&copy; 2026 PrediX Prediction Market. All rights reserved.</p>
             </div>
         `
     };
