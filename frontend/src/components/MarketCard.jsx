@@ -13,8 +13,9 @@ const MarketCard = ({ market, onTrade }) => {
                     {market.category}
                 </span>
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    <span className="live-badge" style={market.resolved ? { color: 'var(--text-muted)' } : {}}>
-                        {market.status === 'live' ? 'Live' : market.status}
+                    <span className={`live-badge ${market.status === 'live' && !market.resolved ? 'active' : ''}`} style={market.resolved ? { color: 'var(--text-muted)' } : {}}>
+                        {market.status === 'live' && !market.resolved && <span className="live-dot"></span>}
+                        {market.status === 'live' ? 'LIVE' : market.status.toUpperCase()}
                     </span>
                     <span className="volume-tag">{formatVolume(market.volume || 0)}</span>
                 </div>
