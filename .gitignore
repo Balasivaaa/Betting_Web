@@ -1,1 +1,11 @@
+node_modules
+.env
 .vercel
+dist
+build
+.DS_Store
+*.log
+api/node_modules
+frontend/node_modules
+frontend/dist
+server/node_modules
