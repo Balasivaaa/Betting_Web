@@ -139,11 +139,11 @@ input, select, textarea { font-family: inherit; color: var(--text-primary); back
 .markets-hero { padding: 48px 0; text-align: left; }
 .markets-hero h1 { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 8px; color: var(--text-primary); display: inline-block; background: none; -webkit-text-fill-color: initial;}
 .markets-hero p { color: var(--text-secondary); font-size: 1rem; max-width: 600px;}
-.controls-bar { display: flex; flex-direction: column; align-items: stretch; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color); gap: 12px;}
-.categories-scroll { display: flex; gap: 8px; flex-wrap: wrap; padding-bottom: 4px; scrollbar-width: none; }
+.controls-bar { display: flex; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color); gap: 12px; flex-wrap: wrap;}
+.categories-scroll { display: flex; gap: 8px; flex-wrap: wrap; padding-bottom: 4px; scrollbar-width: none; flex: 1; }
 .category-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--bg-primary); font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); white-space: nowrap; }
 .category-btn.active { background: var(--text-primary); color: var(--bg-secondary); border-color: var(--text-primary); }
-.search-bar { position: relative; width: 100%; max-width: 400px; }
+.search-bar { position: relative; width: 240px; flex-shrink: 0; }
 .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); width: 16px; }
 .search-bar input { width: 100%; padding: 8px 12px 8px 36px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-secondary); font-size: 0.85rem; }
 
