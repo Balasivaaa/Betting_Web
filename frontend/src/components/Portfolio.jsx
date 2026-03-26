@@ -55,22 +55,39 @@ const Portfolio = () => {
 
     return (
         <div className="portfolio-page fade-in">
-            <header className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '20px' }}>
-                <div>
-                    <h1 className="page-title">My Portfolio <span className={`badge-mode ${accountMode}`}>{accountMode.toUpperCase()}</span></h1>
-                    <p className="page-subtitle">Manage your trades and track performance</p>
+            <div className="profile-header-card fade-in" style={{ display: 'flex', alignItems: 'center', gap: '24px', background: 'var(--bg-secondary)', padding: '32px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', marginBottom: '32px', boxShadow: 'var(--shadow-md)', flexWrap: 'wrap' }}>
+                <div className="profile-avatar-large" style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'var(--text-primary)', color: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', fontWeight: '800', flexShrink: 0 }}>
+                    {user.name[0].toUpperCase()}
                 </div>
-                {accountMode === 'real' && (
-                    <button 
-                        className="trade-btn" 
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px' }}
-                        onClick={() => setShowWithdrawModal(true)}
-                    >
-                        <Landmark size={18} /> Withdraw Funds
-                    </button>
-                )}
-            </header>
+                <div style={{ flex: 1, minWidth: '250px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px', flexWrap: 'wrap' }}>
+                        <h1 style={{ fontSize: '1.8rem', fontWeight: '800', margin: 0, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>{user.name}</h1>
+                        <span style={{ padding: '4px 10px', background: user.role === 'admin' ? 'rgba(124, 58, 237, 0.1)' : 'var(--bg-primary)', color: user.role === 'admin' ? 'var(--accent-purple)' : 'var(--text-secondary)', border: `1px solid ${user.role === 'admin' ? 'rgba(124, 58, 237, 0.2)' : 'var(--border-color)'}`, borderRadius: '20px', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                            {user.role === 'admin' ? 'Administrator' : 'Trader'}
+                        </span>
+                    </div>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', margin: '0 0 16px 0' }}>{user.email}</p>
+                    
+                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+                        <div style={{ padding: '8px 16px', background: 'var(--bg-primary)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: accountMode === 'real' ? 'var(--accent-green)' : 'var(--accent-yellow)', display: 'inline-block' }}></span>
+                            <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-secondary)' }}>Trading Mode: <span style={{ color: 'var(--text-primary)' }}>{accountMode.toUpperCase()}</span></span>
+                        </div>
+                        
+                        {accountMode === 'real' && (
+                            <button 
+                                className="trade-btn" 
+                                style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontWeight: '600', borderRadius: 'var(--radius-sm)' }}
+                                onClick={() => setShowWithdrawModal(true)}
+                            >
+                                <Landmark size={16} /> Withdraw Funds
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
 
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '800', marginBottom: '16px', letterSpacing: '-0.02em' }}>Portfolio Performance</h2>
             <div className="portfolio-stats">
                 {stats.map((stat, idx) => (
                     <div key={idx} className={`portfolio-stat-card ${stat.color} stagger-${idx+1}`}>

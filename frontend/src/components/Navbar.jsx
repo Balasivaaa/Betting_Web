@@ -9,7 +9,7 @@ const Navbar = ({ currentPage, onNavigate }) => {
 
     const navLinks = [
         { id: 'markets', label: 'Markets', icon: '🏛️' },
-        { id: 'portfolio', label: 'Portfolio', icon: '💼' },
+        { id: 'portfolio', label: 'Profile', icon: '👤' },
         { id: 'leaderboard', label: 'Leaderboard', icon: '🏆' }
     ];
 
