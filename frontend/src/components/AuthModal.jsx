@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Modal from './Modal';
 import { useAuth } from '../context/AuthContext';
-import { User, Lock, Mail, ChevronRight } from 'lucide-react';
+import { User, Lock, Mail, ChevronRight, Loader2 } from 'lucide-react';
 
 const AuthModal = ({ isOpen, onClose }) => {
     const { login, register } = useAuth();
@@ -86,9 +86,12 @@ const AuthModal = ({ isOpen, onClose }) => {
 
                 {error && <div className="form-error visible">{error}</div>}
 
-                <button type="submit" className="btn btn-primary btn-block" style={{ marginTop: '12px', fontWeight: '800' }} disabled={isLoading}>
-                    {isLoading ? 'Processing...' : 'Submit'}
-                    <ChevronRight size={18} style={{ marginLeft: '8px' }} />
+                <button type="submit" className={`btn btn-primary btn-block auth-submit-btn ${isLoading ? 'loading' : ''}`} style={{ marginTop: '12px', fontWeight: '800' }} disabled={isLoading}>
+                    {isLoading ? (
+                        <><Loader2 size={18} className="spin-icon" /> Authenticating...</>
+                    ) : (
+                        <>{isLogin ? 'Sign In' : 'Create Account'} <ChevronRight size={18} style={{ marginLeft: '8px' }} /></>
+                    )}
                 </button>
 
                 <div className="auth-switch">

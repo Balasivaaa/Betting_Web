@@ -288,6 +288,11 @@ input, select, textarea { font-family: inherit; color: var(--text-primary); back
 .input-icon { position: absolute; left: 12px; color: var(--text-muted); }
 .input-group input { padding-left: 36px; }
 
+/* Auth Submit Button Animation */
+.auth-submit-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.auth-submit-btn.loading { opacity: 0.85; pointer-events: none; }
+.spin-icon { animation: orbit 1s linear infinite; }
+
 /* Animations Reset */
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; } }
 
