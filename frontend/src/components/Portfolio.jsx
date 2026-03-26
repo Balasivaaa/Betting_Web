@@ -31,33 +31,12 @@ const Portfolio = () => {
     }, []);
 
     if (!user) return (
-        <div className="portfolio-page fade-in" style={{ padding: '40px 24px' }}>
-            <div style={{ display: 'flex', gap: '24px', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap' }}>
-                <div className="skeleton-circle" style={{ width: '80px', height: '80px' }}></div>
-                <div style={{ flex: 1 }}>
-                    <div className="skeleton-line" style={{ width: '180px', height: '28px' }}></div>
-                    <div className="skeleton-line" style={{ width: '220px', height: '14px', marginTop: '8px' }}></div>
-                    <div className="skeleton-line" style={{ width: '140px', height: '30px', marginTop: '16px', borderRadius: '6px' }}></div>
-                </div>
+        <div className="premium-loader">
+            <div className="loader-ring">
+                <span className="loader-logo">P<span className="accent">X</span></span>
             </div>
-            <div className="skeleton-line" style={{ width: '200px', height: '22px', marginBottom: '16px' }}></div>
-            <div className="portfolio-stats">
-                {[1,2,3,4].map(i => (
-                    <div key={i} className="portfolio-stat-card skeleton-card">
-                        <div className="skeleton-circle" style={{width:'40px',height:'40px'}}></div>
-                        <div style={{ flex: 1 }}>
-                            <div className="skeleton-line" style={{ width: '60%', height: '12px' }}></div>
-                            <div className="skeleton-line" style={{ width: '40%', height: '20px', marginTop: '8px' }}></div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-            <div className="content-card" style={{ marginTop: '24px' }}>
-                <div className="skeleton-line" style={{ width: '100%', height: '44px', borderRadius: '8px 8px 0 0' }}></div>
-                <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
-                    <h2>Please sign in to view your portfolio</h2>
-                </div>
-            </div>
+            <div className="loader-bar"><div className="loader-bar-fill"></div></div>
+            <span className="loader-text">Please sign in to view your profile</span>
         </div>
     );
 
