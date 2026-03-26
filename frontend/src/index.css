@@ -272,11 +272,16 @@ input, select, textarea { font-family: inherit; color: var(--text-primary); back
 
 @media (max-width: 768px) {
     /* Navbar & Header */
+    .nav-container { padding: 0 16px; flex-wrap: wrap; }
+    .nav-left { margin-right: 10px; gap: 8px; }
+    .logo { font-size: 1.2rem; }
     .nav-links { display: none; }
     .mobile-menu-btn { display: block; }
-    .nav-right { gap: 10px; }
+    .nav-right { gap: 8px; }
     .wallet-badge { padding: 4px 10px; font-size: 0.75rem; }
-    .theme-toggle-btn { width: 28px; height: 28px; }
+    .theme-toggle-btn { width: 32px; height: 32px; }
+    .user-avatar { width: 28px; height: 28px; font-size: 0.8rem; }
+    .user-menu-btn { padding-right: 8px; gap: 6px; }
     
     /* Container & Spacing */
     .main-content { padding: 24px 12px 100px; }
