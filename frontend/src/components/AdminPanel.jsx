@@ -5,6 +5,7 @@ import { Plus, CheckCircle, AlertCircle, Users, BarChart2, Calendar, Tag, Info, 
 const AdminPanel = () => {
     const [markets, setMarkets] = useState([]);
     const [withdrawals, setWithdrawals] = useState([]);
+    const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [editingMarket, setEditingMarket] = useState(null);
@@ -21,18 +22,23 @@ const AdminPanel = () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('PrediX_token');
-            const [mRes, wRes] = await Promise.all([
+            const [mRes, wRes, uRes] = await Promise.all([
                 fetch('/api/markets'),
                 fetch('/api/withdraw/admin/pending', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }),
+                fetch('/api/auth/users', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 })
             ]);
             
             const mData = await mRes.json();
             const wData = await wRes.json();
+            const uData = uRes.ok ? await uRes.json() : [];
             
             setMarkets(mData);
             setWithdrawals(Array.isArray(wData) ? wData : []);
+            setUsers(Array.isArray(uData) ? uData : []);
         } catch (err) {
             console.error('Fetch error:', err);
         } finally {
@@ -172,6 +178,7 @@ const AdminPanel = () => {
         totalMarkets: markets.length,
         pendingWithdrawals: withdrawals.length,
         activeMarkets: markets.filter(m => !m.resolved).length,
+        totalUsers: users.length,
     };
 
     return (
@@ -213,6 +220,13 @@ const AdminPanel = () => {
                     <div className="stat-info">
                         <span className="stat-label">Withdrawals</span>
                         <span className="stat-value">{stats.pendingWithdrawals}</span>
+                    </div>
+                </div>
+                <div className="portfolio-stat-card green">
+                    <div className="stat-icon-wrapper"><Users size={24} /></div>
+                    <div className="stat-info">
+                        <span className="stat-label">Total Users</span>
+                        <span className="stat-value">{stats.totalUsers}</span>
                     </div>
                 </div>
             </div>
@@ -309,6 +323,48 @@ const AdminPanel = () => {
                                                     <Trash2 size={16} />
                                                 </button>
                                             </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {/* Users Section */}
+                <div className="content-card">
+                    <div className="card-header" style={{ background: 'var(--accent-green)', color: 'white' }}>
+                        <h3>Registered Users ({users.length})</h3>
+                    </div>
+                    <div className="table-wrapper">
+                        <table className="data-table">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Role</th>
+                                    <th>Demo Wallet</th>
+                                    <th>Real Wallet</th>
+                                    <th>Trades</th>
+                                    <th>Joined</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {users.map(u => (
+                                    <tr key={u._id}>
+                                        <td>
+                                            <div style={{ fontWeight: '600' }}>{u.name}</div>
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{u.email}</div>
+                                        </td>
+                                        <td>
+                                            <span className={`status-badge ${u.role === 'admin' ? 'active' : ''}`}>
+                                                {u.role?.toUpperCase()}
+                                            </span>
+                                        </td>
+                                        <td>₹{(u.demoWallet || 0).toLocaleString()}</td>
+                                        <td>₹{(u.realWallet || 0).toLocaleString()}</td>
+                                        <td>{(u.portfolio || []).length}</td>
+                                        <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                            {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A'}
                                         </td>
                                     </tr>
                                 ))}

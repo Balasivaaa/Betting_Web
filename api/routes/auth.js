@@ -134,4 +134,24 @@ router.get('/leaderboard', async (req, res) => {
     }
 });
 
+// Admin: Fetch All Users
+router.get('/users', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ error: 'Unauthorized' });
+        
+        const decoded = jwt.verify(token, JWT_SECRET);
+        if (decoded.role !== 'admin') return res.status(403).json({ error: 'Forbidden' });
+
+        const users = await User.find({})
+            .select('-password')
+            .sort({ createdAt: -1 });
+        
+        res.json(users);
+    } catch (error) {
+        console.error('Fetch Users Error:', error);
+        res.status(500).json({ error: 'Failed to fetch users' });
+    }
+});
+
 module.exports = router;
