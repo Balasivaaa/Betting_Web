@@ -271,17 +271,26 @@ input, select, textarea { font-family: inherit; color: var(--text-primary); back
 .mobile-menu-btn { display: none; background: none; border: none; color: var(--text-primary); cursor: pointer; padding: 4px; }
 
 @media (max-width: 768px) {
-    /* Navbar & Header */
-    .nav-container { padding: 0 16px; flex-wrap: wrap; }
-    .nav-left { margin-right: 10px; gap: 8px; }
-    .logo { font-size: 1.2rem; }
+    /* Standardize mobile navbar height and flex alignment */
+    .navbar { height: 64px; }
+    .nav-container { padding: 0 16px; justify-content: space-between; flex-wrap: nowrap; }
+    
+    /* Perfect grouping: push left to far left, right to far right */
+    .nav-left { margin-right: 0; gap: 12px; flex-shrink: 0; }
+    .nav-right { margin-left: auto; gap: 8px; justify-content: flex-end; flex-shrink: 0; }
+    
+    /* Conserve space by scaling icons/hiding text */
+    .logo-text { display: none; }
+    .logo-icon { width: 28px; height: 28px; border-radius: 8px; font-size: 1rem; }
     .nav-links { display: none; }
     .mobile-menu-btn { display: block; }
-    .nav-right { gap: 8px; }
-    .wallet-badge { padding: 4px 10px; font-size: 0.75rem; }
-    .theme-toggle-btn { width: 32px; height: 32px; }
+    
+    /* Shrink utilities */
+    .wallet-badge { padding: 4px 8px; font-size: 0.75rem; gap: 4px; border-width: 1px; }
+    .theme-toggle-btn { width: 30px; height: 30px; }
+    .theme-toggle-btn svg { width: 14px; height: 14px; }
     .user-avatar { width: 28px; height: 28px; font-size: 0.8rem; }
-    .user-menu-btn { padding-right: 8px; gap: 6px; }
+    .user-menu-btn { padding: 3px; padding-right: 6px; gap: 4px; }
     
     /* Container & Spacing */
     .main-content { padding: 24px 12px 100px; }
