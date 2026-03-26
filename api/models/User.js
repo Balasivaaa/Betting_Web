@@ -18,6 +18,19 @@ const userSchema = new mongoose.Schema({
     demoWallet: { type: Number, default: 10000 },
     realWallet: { type: Number, default: 0 },
     portfolio: [portfolioSchema],
+    tradeHistory: [{
+        marketId: { type: String, required: true },
+        question: { type: String },
+        side: { type: String, enum: ['yes', 'no'], required: true },
+        shares: { type: Number, required: true },
+        price: { type: Number, required: true },
+        amount: { type: Number, required: true },
+        accountMode: { type: String, enum: ['demo', 'real'], default: 'demo' },
+        result: { type: String, enum: ['pending', 'won', 'lost'], default: 'pending' },
+        payout: { type: Number, default: 0 },
+        tradedAt: { type: Date, default: Date.now },
+        resolvedAt: { type: Date }
+    }],
     withdrawals: [{
         amount: { type: Number, required: true },
         status: { type: String, enum: ['pending', 'completed', 'rejected'], default: 'pending' },

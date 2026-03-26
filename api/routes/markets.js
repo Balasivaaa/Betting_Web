@@ -95,6 +95,19 @@ router.post('/trade', async (req, res) => {
             user.portfolio.push(newTrade);
         }
 
+        // Add to permanent trade history
+        user.tradeHistory.push({
+            marketId: market._id.toString(),
+            question: market.question,
+            side: side,
+            shares: shares,
+            price: price,
+            amount: totalCost,
+            accountMode: accountMode,
+            result: 'pending',
+            tradedAt: new Date()
+        });
+
         await user.save();
         market.volume = (market.volume || 0) + totalCost;
         await market.save();
@@ -143,6 +156,22 @@ router.post('/resolve', async (req, res) => {
                  }
                  user.portfolio = user.portfolio.filter(p => p !== pos);
              }
+             // Update history entries for this market
+             if (user.tradeHistory && user.tradeHistory.length > 0) {
+                 user.tradeHistory = user.tradeHistory.map(h => {
+                     if (h.marketId === marketId && h.result === 'pending') {
+                         const isWin = h.side === outcome;
+                         return {
+                             ...h.toObject(),
+                             result: isWin ? 'won' : 'lost',
+                             payout: isWin ? h.shares : 0,
+                             resolvedAt: new Date()
+                         };
+                     }
+                     return h;
+                 });
+             }
+
              await user.save();
         }
         res.json({ message: `Market resolved as ${outcome.toUpperCase()}.` });

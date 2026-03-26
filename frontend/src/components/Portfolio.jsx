@@ -154,6 +154,54 @@ const Portfolio = () => {
                     </div>
                 </div>
 
+                <div className="content-card" style={{ marginTop: '32px' }}>
+                    <div className="card-header">
+                        <h3>Trade History</h3>
+                    </div>
+                    <div className="table-wrapper">
+                        <table className="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Market</th>
+                                    <th>Side</th>
+                                    <th>Amount</th>
+                                    <th>Result</th>
+                                    <th>Payout</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {user.tradeHistory && user.tradeHistory.length > 0 ? (
+                                    user.tradeHistory.slice().reverse().map((trade, idx) => (
+                                        <tr key={trade._id || idx}>
+                                            <td className="market-cell">{trade.question}</td>
+                                            <td><span className={`badge ${trade.side.toLowerCase()}`}>{trade.side.toUpperCase()}</span></td>
+                                            <td>₹{trade.amount.toFixed(2)}</td>
+                                            <td>
+                                                <span className={`status-badge ${trade.result}`}>
+                                                    {trade.result.toUpperCase()}
+                                                </span>
+                                            </td>
+                                            <td className={trade.payout > 0 ? 'green' : ''}>
+                                                {trade.payout > 0 ? `+₹${trade.payout.toFixed(2)}` : '₹0.00'}
+                                            </td>
+                                            <td style={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
+                                                {new Date(trade.tradedAt).toLocaleDateString()}
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="6" className="empty-row" style={{ textAlign: 'center', padding: '60px', color: 'var(--text-muted)' }}>
+                                            No trade history found
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 {user.withdrawals && user.withdrawals.length > 0 && (
                     <div className="content-card" style={{ marginTop: '32px' }}>
                         <div className="card-header">
