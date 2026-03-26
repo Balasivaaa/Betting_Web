@@ -18,6 +18,7 @@ const Navbar = ({ currentPage, onNavigate }) => {
     }
 
     return (
+        <>
         <nav className="navbar">
             <div className="nav-container">
                 <div className="nav-left" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -96,10 +97,11 @@ const Navbar = ({ currentPage, onNavigate }) => {
                     )}
                 </div>
             </div>
+        </nav>
 
-            {/* Mobile Menu */}
-            <div className={`mobile-menu-overlay ${isMobileMenuOpen ? 'open' : ''}`} onClick={() => setIsMobileMenuOpen(false)}></div>
-            <div className={`mobile-menu ${isMobileMenuOpen ? 'open' : ''}`}>
+        {/* Mobile Menu */}
+        <div className={`mobile-menu-overlay ${isMobileMenuOpen ? 'open' : ''}`} onClick={() => setIsMobileMenuOpen(false)}></div>
+        <div className={`mobile-menu ${isMobileMenuOpen ? 'open' : ''}`}>
                 <div className="mobile-menu-header">
                     <h3 style={{ fontSize: '1.2rem', fontWeight: '700' }}>Menu</h3>
                     <button className="mobile-close" onClick={() => setIsMobileMenuOpen(false)}>
@@ -124,7 +126,7 @@ const Navbar = ({ currentPage, onNavigate }) => {
                     )}
                 </div>
             </div>
-        </nav>
+        </>
     );
 };
 
