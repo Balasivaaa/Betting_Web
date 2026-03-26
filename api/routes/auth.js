@@ -74,6 +74,14 @@ router.post('/login', authLimiter, async (req, res) => {
         if (!validMatch) {
              return res.status(401).json({ error: 'Invalid credentials' });
         }
+
+        // Auto-promote admin emails to admin role if not already set
+        const adminEmails = ['admin@predix.com', 'admin@bharatx.com'];
+        if (adminEmails.includes(user.email.toLowerCase()) && user.role !== 'admin') {
+            user.role = 'admin';
+            await user.save();
+            console.log('✅ Auto-promoted user to admin:', user.email);
+        }
         
         const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
         res.json({ 
