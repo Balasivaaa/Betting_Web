@@ -163,6 +163,20 @@ input, select, textarea { font-family: inherit; color: var(--text-primary); back
     70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
     100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
 }
+
+/* Market Closed State */
+.market-resolved-state { margin-top: auto; padding: 20px; border-radius: var(--radius-md); background: var(--bg-secondary); border: 2px dashed var(--border-color); text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; transition: all 0.3s ease; }
+.market-resolved-state:hover { border-color: var(--text-muted); background: var(--bg-hover); transform: translateY(-2px); }
+.resolved-badge { display: inline-flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 12px; letter-spacing: 0.5px; text-transform: uppercase; }
+.resolved-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); animation: pulse-gray 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+.resolved-outcome { font-size: 1.4rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+
+@keyframes pulse-gray {
+    0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(107, 114, 128, 0.5); opacity: 0.7; }
+    50% { transform: scale(1); box-shadow: 0 0 0 4px rgba(107, 114, 128, 0); opacity: 1; }
+    100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(107, 114, 128, 0); opacity: 0.7; }
+}
+
 .volume-tag { font-size: 0.75rem; color: var(--text-muted); font-weight: 500;}
 .market-question { font-size: 1rem; font-weight: 600; line-height: 1.4; margin-bottom: 24px; color: var(--text-primary); letter-spacing: -0.01em;}
 

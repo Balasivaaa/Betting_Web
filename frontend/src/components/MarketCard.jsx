@@ -44,10 +44,12 @@ const MarketCard = ({ market, onTrade }) => {
                     </div>
                 </>
             ) : (
-                <div className="market-resolved-state" style={{ marginTop: 'auto', padding: '16px', borderRadius: '8px', background: 'var(--bg-primary)', border: '1px dashed var(--border-color)', textAlign: 'center' }}>
-                    <span style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>Market Closed</span>
-                    <span style={{ fontSize: '1.25rem', fontWeight: '800', color: market.outcome === 'yes' ? 'var(--accent-green)' : 'var(--accent-red)' }}>
-                        Outcome: {market.outcome?.toUpperCase()}
+                <div className="market-resolved-state">
+                    <span className="resolved-badge">
+                        <span className="resolved-dot"></span> Market Closed
+                    </span>
+                    <span className="resolved-outcome" style={{ color: market.outcome === 'yes' ? 'var(--accent-green)' : 'var(--accent-red)' }}>
+                        Outcome: {market.outcome}
                     </span>
                 </div>
             )}
