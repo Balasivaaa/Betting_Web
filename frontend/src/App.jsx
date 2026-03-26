@@ -16,7 +16,8 @@ const AppContent = () => {
     const { user, login } = useAuth();
     const [currentPage, setCurrentPage] = useState('markets');
     
-    const isAdmin = user && user.email === 'admin@PrediX.com';
+    // Check admin access (case-insensitive and backward compatible)
+    const isAdmin = user && user.email && (user.email.toLowerCase() === 'admin@predix.com' || user.email.toLowerCase() === 'admin@bharatx.com');
     
     // Modal states
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);

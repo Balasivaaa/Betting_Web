@@ -13,7 +13,9 @@ const Navbar = ({ currentPage, onNavigate }) => {
         { id: 'leaderboard', label: 'Leaderboard', icon: '🏆' }
     ];
 
-    if (user && user.email === 'admin@PrediX.com') {
+    // Check admin access (case-insensitive and backward compatible)
+    const isAdmin = user && user.email && (user.email.toLowerCase() === 'admin@predix.com' || user.email.toLowerCase() === 'admin@bharatx.com');
+    if (isAdmin) {
         navLinks.push({ id: 'admin', label: 'Admin', icon: '⚙️' });
     }
 
