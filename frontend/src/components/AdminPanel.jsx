@@ -10,6 +10,7 @@ const AdminPanel = () => {
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [editingMarket, setEditingMarket] = useState(null);
     const [editPrices, setEditPrices] = useState({ yes: 5, no: 5 });
+    const [showUsers, setShowUsers] = useState(false);
     const [newMarket, setNewMarket] = useState({
         question: '',
         category: 'Politics',
@@ -172,7 +173,36 @@ const AdminPanel = () => {
         }
     };
 
-    if (loading && markets.length === 0) return <div style={{ padding: '100px', textAlign: 'center' }}><Loader2 className="animate-spin" /></div>;
+    if (loading && markets.length === 0) return (
+        <div className="admin-page fade-in" style={{ padding: '40px 24px' }}>
+            <div className="skeleton-header">
+                <div className="skeleton-line" style={{ width: '220px', height: '28px' }}></div>
+                <div className="skeleton-line" style={{ width: '140px', height: '16px', marginTop: '8px' }}></div>
+            </div>
+            <div className="portfolio-stats" style={{ marginTop: '32px' }}>
+                {[1,2,3,4].map(i => (
+                    <div key={i} className="portfolio-stat-card skeleton-card">
+                        <div className="skeleton-circle"></div>
+                        <div style={{ flex: 1 }}>
+                            <div className="skeleton-line" style={{ width: '60%', height: '12px' }}></div>
+                            <div className="skeleton-line" style={{ width: '40%', height: '22px', marginTop: '8px' }}></div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+            <div className="content-card" style={{ marginTop: '32px' }}>
+                <div className="skeleton-line" style={{ width: '100%', height: '48px', borderRadius: '8px 8px 0 0' }}></div>
+                {[1,2,3,4].map(i => (
+                    <div key={i} style={{ display: 'flex', gap: '16px', padding: '16px 20px', borderBottom: '1px solid var(--border-color)' }}>
+                        <div className="skeleton-line" style={{ flex: 3, height: '16px' }}></div>
+                        <div className="skeleton-line" style={{ flex: 1, height: '16px' }}></div>
+                        <div className="skeleton-line" style={{ flex: 1, height: '16px' }}></div>
+                        <div className="skeleton-line" style={{ flex: 1, height: '16px' }}></div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
 
     const stats = {
         totalMarkets: markets.length,
@@ -222,10 +252,10 @@ const AdminPanel = () => {
                         <span className="stat-value">{stats.pendingWithdrawals}</span>
                     </div>
                 </div>
-                <div className="portfolio-stat-card green">
+                <div className="portfolio-stat-card green" onClick={() => setShowUsers(!showUsers)} style={{ cursor: 'pointer' }}>
                     <div className="stat-icon-wrapper"><Users size={24} /></div>
                     <div className="stat-info">
-                        <span className="stat-label">Total Users</span>
+                        <span className="stat-label">Total Users {showUsers ? '▲' : '▼'}</span>
                         <span className="stat-value">{stats.totalUsers}</span>
                     </div>
                 </div>
@@ -331,7 +361,8 @@ const AdminPanel = () => {
                     </div>
                 </div>
 
-                {/* Users Section */}
+                {/* Users Section - Toggle */}
+                {showUsers && (
                 <div className="content-card">
                     <div className="card-header" style={{ background: 'var(--accent-green)', color: 'white' }}>
                         <h3>Registered Users ({users.length})</h3>
@@ -372,6 +403,7 @@ const AdminPanel = () => {
                         </table>
                     </div>
                 </div>
+                )}
             </div>
 
             {showCreateForm && (
