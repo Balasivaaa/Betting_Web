@@ -7,38 +7,51 @@ const MarketCard = ({ market, onTrade }) => {
     const noPrice = market.probability?.no || 0.5;
 
     return (
-        <div className="market-card fade-in">
+        <div className={`market-card fade-in ${market.resolved ? 'resolved-card' : ''}`}>
             <div className="market-card-header">
                 <span className={`category-tag ${market.category?.toLowerCase()}`}>
                     {market.category}
                 </span>
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    <span className="live-badge">{market.status === 'live' ? 'Live' : market.status}</span>
+                    <span className="live-badge" style={market.resolved ? { color: 'var(--text-muted)' } : {}}>
+                        {market.status === 'live' ? 'Live' : market.status}
+                    </span>
                     <span className="volume-tag">{formatVolume(market.volume || 0)}</span>
                 </div>
             </div>
             
-            <h3 className="market-question">{market.question}</h3>
+            <h3 className="market-question" style={market.resolved ? { opacity: 0.7 } : {}}>{market.question}</h3>
             
-            <div className="market-prices">
-                <div className="market-price-box yes" onClick={() => onTrade(market, 'yes')}>
-                    <span className="price-label">YES</span>
-                    <span className="price-value">₹{yesPrice.toFixed(2)}</span>
-                </div>
-                <div className="market-price-box no" onClick={() => onTrade(market, 'no')}>
-                    <span className="price-label">NO</span>
-                    <span className="price-value">₹{noPrice.toFixed(2)}</span>
-                </div>
-            </div>
+            {!market.resolved ? (
+                <>
+                    <div className="market-prices">
+                        <div className="market-price-box yes">
+                            <span className="price-label">YES</span>
+                            <span className="price-value">₹{yesPrice.toFixed(2)}</span>
+                        </div>
+                        <div className="market-price-box no">
+                            <span className="price-label">NO</span>
+                            <span className="price-value">₹{noPrice.toFixed(2)}</span>
+                        </div>
+                    </div>
 
-            <div className="market-card-footer">
-                <span className="end-date">Ends {market.endDate}</span>
-                <button className="trade-btn" onClick={() => onTrade(market, 'yes')}>
-                    Trade
-                </button>
-            </div>
+                    <div className="market-card-footer">
+                        <span className="end-date">Ends {market.endDate}</span>
+                        <button className="trade-btn" onClick={() => onTrade(market, 'yes')}>
+                            Trade
+                        </button>
+                    </div>
+                </>
+            ) : (
+                <div className="market-resolved-state" style={{ marginTop: 'auto', padding: '16px', borderRadius: '8px', background: 'var(--bg-primary)', border: '1px dashed var(--border-color)', textAlign: 'center' }}>
+                    <span style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>Market Closed</span>
+                    <span style={{ fontSize: '1.25rem', fontWeight: '800', color: market.outcome === 'yes' ? 'var(--accent-green)' : 'var(--accent-red)' }}>
+                        Outcome: {market.outcome?.toUpperCase()}
+                    </span>
+                </div>
+            )}
         </div>
     );
 };
 
-export default MarketCard;
+export default React.memo(MarketCard);

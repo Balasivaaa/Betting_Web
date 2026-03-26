@@ -98,7 +98,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                     </button>
                 </div>
                 
-                <div className="demo-hint" onClick={() => setFormData({ email: 'demo@bharatx.com', password: 'demo123' })} style={{ cursor: 'pointer', marginTop: '15px', color: 'var(--text-muted)', fontSize: '0.8rem', textAlign: 'center', borderTop: '1px solid var(--border-color)', paddingTop: '10px' }}>
+                <div className="demo-hint" onClick={() => setFormData({ email: 'demo@PrediX.com', password: 'demo123' })} style={{ cursor: 'pointer', marginTop: '15px', color: 'var(--text-muted)', fontSize: '0.8rem', textAlign: 'center', borderTop: '1px solid var(--border-color)', paddingTop: '10px' }}>
                     Click here to use Demo Account
                 </div>
             </form>

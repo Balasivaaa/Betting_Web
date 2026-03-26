@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { CATEGORIES } from '../utils/mockData';
-import { Plus, CheckCircle, AlertCircle, Users, BarChart2, Calendar, Tag, Info, Loader2 } from 'lucide-react';
+import { Plus, CheckCircle, AlertCircle, Users, BarChart2, Calendar, Tag, Info, Loader2, Trash2 } from 'lucide-react';
 
 const AdminPanel = () => {
     const [markets, setMarkets] = useState([]);
+    const [withdrawals, setWithdrawals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showCreateForm, setShowCreateForm] = useState(false);
+    const [editingMarket, setEditingMarket] = useState(null);
+    const [editPrices, setEditPrices] = useState({ yes: 5, no: 5 });
     const [newMarket, setNewMarket] = useState({
         question: '',
         category: 'Politics',
@@ -17,9 +20,19 @@ const AdminPanel = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/markets');
-            const data = await res.json();
-            setMarkets(data);
+            const token = localStorage.getItem('PrediX_token');
+            const [mRes, wRes] = await Promise.all([
+                fetch('/api/markets'),
+                fetch('/api/withdraw/admin/pending', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+            ]);
+            
+            const mData = await mRes.json();
+            const wData = await wRes.json();
+            
+            setMarkets(mData);
+            setWithdrawals(Array.isArray(wData) ? wData : []);
         } catch (err) {
             console.error('Fetch error:', err);
         } finally {
@@ -33,7 +46,7 @@ const AdminPanel = () => {
 
     const handleResolve = async (marketId, outcome) => {
         try {
-            const token = localStorage.getItem('bharatx_token');
+            const token = localStorage.getItem('PrediX_token');
             const res = await fetch('/api/markets/resolve', {
                 method: 'POST',
                 headers: {
@@ -54,10 +67,58 @@ const AdminPanel = () => {
         }
     };
 
+    const handleDelete = async (marketId) => {
+        console.log('Attempting to delete market:', marketId);
+        if (!window.confirm('Are you sure you want to delete this market? This cannot be undone.')) {
+            console.log('Delete cancelled by user');
+            return;
+        }
+        
+        try {
+            const token = localStorage.getItem('PrediX_token');
+            const res = await fetch(`/api/markets/${marketId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            const data = await res.json();
+            if (res.ok) {
+                setMessage({ type: 'success', text: data.message });
+                fetchData();
+            } else {
+                setMessage({ type: 'error', text: data.error || 'Delete failed' });
+            }
+        } catch (err) {
+            setMessage({ type: 'error', text: 'Delete failed' });
+        }
+    };
+
+    const handleWithdrawUpdate = async (userId, withdrawalId, status) => {
+        try {
+            const token = localStorage.getItem('PrediX_token');
+            const res = await fetch('/api/withdraw/admin/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ userId, withdrawalId, status })
+            });
+            if (res.ok) {
+                setMessage({ type: 'success', text: `Withdrawal ${status} successfully` });
+                fetchData();
+            }
+        } catch (err) {
+            setMessage({ type: 'error', text: 'Update failed' });
+        }
+    };
+
     const handleCreateMarket = async (e) => {
         e.preventDefault();
         try {
-            const token = localStorage.getItem('bharatx_token');
+            const token = localStorage.getItem('PrediX_token');
             const res = await fetch('/api/markets', {
                 method: 'POST',
                 headers: {
@@ -66,17 +127,42 @@ const AdminPanel = () => {
                 },
                 body: JSON.stringify(newMarket)
             });
+            const data = await res.json();
             if (res.ok) {
                 setMessage({ type: 'success', text: 'Market created successfully!' });
                 fetchData();
                 setShowCreateForm(false);
                 setNewMarket({ question: '', category: 'Politics', endDate: '', probability: { yes: 0.5, no: 0.5 } });
             } else {
-                const data = await res.json();
-                setMessage({ type: 'error', text: data.error || 'Creation failed' });
+                setMessage({ type: 'error', text: data.error || data.details || 'Creation failed' });
             }
         } catch (err) {
             setMessage({ type: 'error', text: 'Creation failed' });
+        }
+    };
+
+    const handleUpdatePrice = async (e) => {
+        e.preventDefault();
+        try {
+            const token = localStorage.getItem('PrediX_token');
+            const res = await fetch(`/api/markets/${editingMarket._id}/price`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ yesPrice: editPrices.yes, noPrice: editPrices.no })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setMessage({ type: 'success', text: 'Price updated successfully!' });
+                fetchData();
+                setEditingMarket(null);
+            } else {
+                setMessage({ type: 'error', text: data.error || 'Update failed' });
+            }
+        } catch (err) {
+            setMessage({ type: 'error', text: 'Update failed' });
         }
     };
 
@@ -84,8 +170,8 @@ const AdminPanel = () => {
 
     const stats = {
         totalMarkets: markets.length,
+        pendingWithdrawals: withdrawals.length,
         activeMarkets: markets.filter(m => !m.resolved).length,
-        resolvedMarkets: markets.filter(m => m.resolved).length,
     };
 
     return (
@@ -103,7 +189,7 @@ const AdminPanel = () => {
             {message && (
                 <div className={`notification ${message.type}`}>
                     {message.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
-                    {message.text}
+                    <span style={{ marginLeft: '8px' }}>{message.text}</span>
                 </div>
             )}
 
@@ -122,59 +208,113 @@ const AdminPanel = () => {
                         <span className="stat-value">{stats.activeMarkets}</span>
                     </div>
                 </div>
-                <div className="portfolio-stat-card green">
-                    <div className="stat-icon-wrapper"><CheckCircle size={24} /></div>
+                <div className="portfolio-stat-card orange">
+                    <div className="stat-icon-wrapper"><Users size={24} /></div>
                     <div className="stat-info">
-                        <span className="stat-label">Resolved</span>
-                        <span className="stat-value">{stats.resolvedMarkets}</span>
+                        <span className="stat-label">Withdrawals</span>
+                        <span className="stat-value">{stats.pendingWithdrawals}</span>
                     </div>
                 </div>
             </div>
 
-            <div className="content-card">
-                <div className="card-header">
-                    <h3>Market Oversight</h3>
-                </div>
-                <div className="table-wrapper">
-                    <table className="data-table">
-                        <thead>
-                            <tr>
-                                <th>Market Details</th>
-                                <th>Category</th>
-                                <th>Volume</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {markets.map(market => (
-                                <tr key={market._id}>
-                                    <td className="market-cell">{market.question}</td>
-                                    <td>
-                                        <span className={`category-tag ${market.category?.toLowerCase() || 'general'}`}>
-                                            {market.category}
-                                        </span>
-                                    </td>
-                                    <td>₹{(market.volume || 0).toLocaleString()}</td>
-                                    <td>
-                                        {market.resolved ? (
-                                            <span className="status-badge resolved">Resolved ({market.outcome?.toUpperCase()})</span>
-                                        ) : (
-                                            <span className="status-badge active">Active</span>
-                                        )}
-                                    </td>
-                                    <td>
-                                        {!market.resolved && (
-                                            <div className="admin-actions">
-                                                <button className="action-btn yes" onClick={() => handleResolve(market._id, 'yes')}>Yes</button>
-                                                <button className="action-btn no" onClick={() => handleResolve(market._id, 'no')}>No</button>
-                                            </div>
-                                        )}
-                                    </td>
+            <div className="portfolio-content" style={{ display: 'grid', gap: '32px' }}>
+                {withdrawals.length > 0 && (
+                    <div className="content-card">
+                        <div className="card-header" style={{ background: 'var(--accent-orange)', color: 'white' }}>
+                            <h3>Pending Withdrawals</h3>
+                        </div>
+                        <div className="table-wrapper">
+                            <table className="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Amount</th>
+                                        <th>Method</th>
+                                        <th>Details</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {withdrawals.map((w, idx) => (
+                                        <tr key={w.withdrawal._id || idx}>
+                                            <td>
+                                                <div style={{ fontWeight: '600' }}>{w.userName}</div>
+                                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{w.userEmail}</div>
+                                            </td>
+                                            <td style={{ fontWeight: '700' }}>₹{w.withdrawal.amount.toLocaleString()}</td>
+                                            <td>{w.withdrawal.method}</td>
+                                            <td style={{ fontSize: '0.8rem', maxWidth: '200px' }}>{w.withdrawal.details}</td>
+                                            <td>
+                                                <div className="admin-actions">
+                                                    <button className="action-btn yes" onClick={() => handleWithdrawUpdate(w.userId, w.withdrawal._id, 'completed')}>Approve</button>
+                                                    <button className="action-btn no" onClick={() => handleWithdrawUpdate(w.userId, w.withdrawal._id, 'rejected')}>Reject</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+
+                <div className="content-card">
+                    <div className="card-header">
+                        <h3>Market Oversight</h3>
+                    </div>
+                    <div className="table-wrapper">
+                        <table className="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Market Details</th>
+                                    <th>Category</th>
+                                    <th>Volume</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {markets.map(market => (
+                                    <tr key={market._id}>
+                                        <td className="market-cell">{market.question}</td>
+                                        <td>
+                                            <span className={`category-tag ${market.category?.toLowerCase() || 'general'}`}>
+                                                {market.category}
+                                            </span>
+                                        </td>
+                                        <td>₹{(market.volume || 0).toLocaleString()}</td>
+                                        <td>
+                                            {market.resolved ? (
+                                                <span className="status-badge resolved">Resolved ({market.outcome?.toUpperCase()})</span>
+                                            ) : (
+                                                <span className="status-badge active">Active</span>
+                                            )}
+                                        </td>
+                                        <td>
+                                            <div className="admin-actions">
+                                                {!market.resolved && (
+                                                    <>
+                                                        <button className="action-btn yes" onClick={() => handleResolve(market._id, 'yes')}>Yes</button>
+                                                        <button className="action-btn no" onClick={() => handleResolve(market._id, 'no')}>No</button>
+                                                        <button className="action-btn" style={{ background: 'var(--accent-blue)', color: 'white', padding: '6px 12px' }} onClick={() => {
+                                                            setEditingMarket(market);
+                                                            setEditPrices({ 
+                                                                yes: (market.probability?.yes || 0.5) * 10, 
+                                                                no: (market.probability?.no || 0.5) * 10 
+                                                            });
+                                                        }}>Adjust Price</button>
+                                                    </>
+                                                )}
+                                                <button className="action-btn delete" onClick={() => handleDelete(market._id)} title="Delete Market">
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -220,6 +360,57 @@ const AdminPanel = () => {
                             </div>
                             <button type="submit" className="trade-btn" style={{ width: '100%', marginTop: '20px', padding: '12px' }}>
                                 Launch Market
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {editingMarket && (
+                <div className="modal-overlay">
+                    <div className="modal" style={{ maxWidth: '400px' }}>
+                        <button className="modal-close" onClick={() => setEditingMarket(null)}>×</button>
+                        <header className="modal-header">
+                            <h2 className="modal-title">Adjust Price</h2>
+                            <p className="modal-subtitle" style={{ fontSize: '0.85rem', marginTop: '4px', color: 'var(--text-muted)' }}>{editingMarket.question}</p>
+                        </header>
+                        <form onSubmit={handleUpdatePrice} style={{ marginTop: '20px' }}>
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label>Yes Price (₹)</label>
+                                    <input 
+                                        type="number" 
+                                        step="0.01"
+                                        min="0.1"
+                                        max="9.9"
+                                        value={editPrices.yes}
+                                        onChange={(e) => {
+                                            const val = e.target.value === '' ? '' : parseFloat(e.target.value);
+                                            setEditPrices({ yes: val, no: val === '' ? '' : Math.max(0, 10 - val).toFixed(2) });
+                                        }}
+                                        required
+                                        className="form-input"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>No Price (₹)</label>
+                                    <input 
+                                        type="number" 
+                                        step="0.01"
+                                        min="0.1"
+                                        max="9.9"
+                                        value={editPrices.no}
+                                        onChange={(e) => {
+                                            const val = e.target.value === '' ? '' : parseFloat(e.target.value);
+                                            setEditPrices({ no: val, yes: val === '' ? '' : Math.max(0, 10 - val).toFixed(2) });
+                                        }}
+                                        required
+                                        className="form-input"
+                                    />
+                                </div>
+                            </div>
+                            <button type="submit" className="trade-btn" style={{ width: '100%', marginTop: '20px', padding: '12px' }}>
+                                Save Prices
                             </button>
                         </form>
                     </div>

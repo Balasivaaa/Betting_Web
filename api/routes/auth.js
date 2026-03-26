@@ -4,55 +4,81 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'bharatx-super-secret-key-123';
+const JWT_SECRET = process.env.JWT_SECRET || 'PrediX_secure_secret_2026';
 
-router.post('/register', async (req, res) => {
+// Simple in-memory rate limiter
+const attempts = new Map();
+function rateLimiter(maxAttempts, windowMs) {
+    return (req, res, next) => {
+        const key = req.ip || 'unknown';
+        const now = Date.now();
+        const record = attempts.get(key) || { count: 0, start: now };
+        if (now - record.start > windowMs) { record.count = 0; record.start = now; }
+        record.count++;
+        attempts.set(key, record);
+        if (record.count > maxAttempts) return res.status(429).json({ error: 'Too many attempts. Please try again later.' });
+        next();
+    };
+}
+const authLimiter = rateLimiter(15, 15 * 60 * 1000);
+
+router.post('/register', authLimiter, async (req, res) => {
     try {
         const { name, email, password } = req.body;
-        console.log('Registering user:', { name, email });
         
         if (!name || !email || !password) {
-            console.log('Missing fields:', { name: !!name, email: !!email, password: !!password });
             return res.status(400).json({ error: 'All fields are required' });
         }
 
-        const exists = await User.findOne({ email });
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ error: 'Invalid email format' });
+        }
+
+        // Enforce minimum password strength
+        if (password.length < 6) {
+            return res.status(400).json({ error: 'Password must be at least 6 characters' });
+        }
+
+        const exists = await User.findOne({ email: email.toLowerCase().trim() });
         if (exists) {
-            console.log('User already exists:', email);
             return res.status(400).json({ error: 'User already exists' });
         }
         
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const user = new User({ name, email, password: hashedPassword });
+        const hashedPassword = await bcrypt.hash(password, 12);
+        const user = new User({ name: name.trim(), email: email.toLowerCase().trim(), password: hashedPassword });
         await user.save();
         console.log('User saved successfully');
         
         const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
         res.json({ 
             token, 
-            user: { id: user._id, name: user.name, email: user.email, role: user.role, demoWallet: user.demoWallet, realWallet: user.realWallet, portfolio: user.portfolio } 
+            user: { id: user._id, name: user.name, email: user.email, role: user.role, demoWallet: user.demoWallet, realWallet: user.realWallet, portfolio: user.portfolio, withdrawals: user.withdrawals } 
         });
     } catch (error) {
-        console.error('Registration Error Details:', error);
-        res.status(500).json({ error: 'Internal Server Error', details: error.message });
+        console.error('Registration Error:', error.message);
+        res.status(500).json({ error: 'Registration failed. Please try again.' });
     }
 });
 
-router.post('/login', async (req, res) => {
+router.post('/login', authLimiter, async (req, res) => {
     try {
         const { email, password } = req.body;
-        const user = await User.findOne({ email });
-        if (!user) return res.status(404).json({ error: 'User not found' });
+        if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
+
+        const user = await User.findOne({ email: email.toLowerCase().trim() });
+        if (!user) return res.status(401).json({ error: 'Invalid credentials' });
         
         const validMatch = await bcrypt.compare(password, user.password);
-        if (!validMatch && password !== 'demo123' && email !== 'demo@bharatx.com') {
-             return res.status(400).json({ error: 'Invalid credentials' });
+        if (!validMatch) {
+             return res.status(401).json({ error: 'Invalid credentials' });
         }
         
         const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
         res.json({ 
             token, 
-            user: { id: user._id, name: user.name, email: user.email, role: user.role, demoWallet: user.demoWallet, realWallet: user.realWallet, portfolio: user.portfolio } 
+            user: { id: user._id, name: user.name, email: user.email, role: user.role, demoWallet: user.demoWallet, realWallet: user.realWallet, portfolio: user.portfolio, withdrawals: user.withdrawals } 
         });
     } catch (error) {
         console.error('Login Error:', error);
@@ -70,7 +96,7 @@ router.get('/me', async (req, res) => {
         if (!user) return res.status(404).json({ error: 'User not found' });
         
         res.json({ 
-            user: { id: user._id, name: user.name, email: user.email, role: user.role, demoWallet: user.demoWallet, realWallet: user.realWallet, portfolio: user.portfolio } 
+            user: { id: user._id, name: user.name, email: user.email, role: user.role, demoWallet: user.demoWallet, realWallet: user.realWallet, portfolio: user.portfolio, withdrawals: user.withdrawals } 
         });
     } catch (error) {
         res.status(401).json({ error: 'Invalid Session' });

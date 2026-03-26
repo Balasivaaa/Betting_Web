@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 const Chatbot = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
-        { role: 'bot', content: 'Hi! I am BharatX AI. How can I help you with markets today?' }
+        { role: 'bot', content: 'Hi! I am PrediX AI. How can I help you with markets today?' }
     ]);
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
@@ -62,7 +62,7 @@ const Chatbot = () => {
                             <div className="chat-header-info">
                                 <div className="bot-avatar"><Bot size={16} /></div>
                                 <div>
-                                    <h4>BharatX AI</h4>
+                                    <h4>PrediX AI</h4>
                                     <span className="online-status">Online</span>
                                 </div>
                             </div>

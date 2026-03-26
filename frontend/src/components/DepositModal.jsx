@@ -17,7 +17,7 @@ const DepositModal = ({ isOpen, onClose }) => {
 
         try {
             // 1. Create order on backend
-            const response = await axios.post('/api/create-order', {
+            const response = await axios.post('/api/payments/create-order', {
                 amount: amount * 100, // paise
                 currency: "INR"
             });
@@ -27,17 +27,17 @@ const DepositModal = ({ isOpen, onClose }) => {
                 key: import.meta.env.VITE_RAZORPAY_KEY_ID, 
                 amount: order.amount,
                 currency: order.currency,
-                name: "BharatX",
+                name: "PrediX",
                 description: "Wallet Refill",
                 order_id: order.id,
                 handler: async function (response) {
                     try {
                         // 2. Verify payment on backend
-                        const verifyRes = await axios.post('/api/verify-payment', {
+                        const verifyRes = await axios.post('/api/payments/verify-payment', {
                             razorpay_order_id: response.razorpay_order_id,
                             razorpay_payment_id: response.razorpay_payment_id,
                             razorpay_signature: response.razorpay_signature,
-                            userId: user._id,
+                            userId: user.id || user._id,
                             amount: amount * 100 // passing paise to match Razorpay unit
                         });
 
@@ -45,11 +45,11 @@ const DepositModal = ({ isOpen, onClose }) => {
                             updateUser(verifyRes.data.user); // Update local user state with data from DB
                             
                             // 3. Send confirmation email
-                            await axios.post('/api/send-confirmation-email', {
+                            await axios.post('/api/payments/send-confirmation-email', {
                                 email: user.email,
                                 amount: amount,
                                 customerName: user.name
-                            });
+                            }).catch(e => console.error("Email failed, but payment succeeded", e));
 
                             setStatus('success');
                             setLoading(false);
@@ -57,11 +57,13 @@ const DepositModal = ({ isOpen, onClose }) => {
                         } else {
                             setStatus('fail');
                             setLoading(false);
+                            alert("Payment verification failed: " + (verifyRes.data.message || "Unknown error"));
                         }
                     } catch (error) {
                         console.error("Verification failed", error);
                         setStatus('fail');
                         setLoading(false);
+                        alert("Database update failed. Please contact support.");
                     }
                 },
                 prefill: {
@@ -70,7 +72,7 @@ const DepositModal = ({ isOpen, onClose }) => {
                     contact: "" // Can be added if user has phone
                 },
                 notes: {
-                    address: "BharatX Corporate Office"
+                    address: "PrediX Corporate Office"
                 },
                 theme: { color: "#4f7df7" },
                 modal: {

@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         const initAuth = async () => {
-            const token = localStorage.getItem('bharatx_token');
+            const token = localStorage.getItem('PrediX_token');
             if (token) {
                 try {
                     const res = await fetch('/api/auth/me', {
@@ -22,17 +22,17 @@ export const AuthProvider = ({ children }) => {
                         const data = await res.json();
                         setUser(data.user);
                     } else {
-                        localStorage.removeItem('bharatx_token');
+                        localStorage.removeItem('PrediX_token');
                     }
                 } catch (error) {
                     console.error('Session restoration failed:', error);
                 }
             }
             
-            const savedMode = localStorage.getItem('bharatx_mode') || 'demo';
+            const savedMode = localStorage.getItem('PrediX_mode') || 'demo';
             setAccountMode(savedMode);
 
-            const savedTheme = localStorage.getItem('bharatx_theme') || 'dark';
+            const savedTheme = localStorage.getItem('PrediX_theme') || 'dark';
             setTheme(savedTheme);
             document.body.setAttribute('data-theme', savedTheme);
             
@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Login failed');
         
-        localStorage.setItem('bharatx_token', data.token);
+        localStorage.setItem('PrediX_token', data.token);
         setUser(data.user);
         return data.user;
     };
@@ -65,27 +65,27 @@ export const AuthProvider = ({ children }) => {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Registration failed');
         
-        localStorage.setItem('bharatx_token', data.token);
+        localStorage.setItem('PrediX_token', data.token);
         setUser(data.user);
         return data.user;
     };
 
     const logout = () => {
         setUser(null);
-        localStorage.removeItem('bharatx_token');
+        localStorage.removeItem('PrediX_token');
     };
 
     const toggleAccountMode = () => {
         const newMode = accountMode === 'demo' ? 'real' : 'demo';
         setAccountMode(newMode);
-        localStorage.setItem('bharatx_mode', newMode);
+        localStorage.setItem('PrediX_mode', newMode);
     };
 
     const toggleTheme = () => {
         const newTheme = theme === 'dark' ? 'light' : 'dark';
         setTheme(newTheme);
         document.body.setAttribute('data-theme', newTheme);
-        localStorage.setItem('bharatx_theme', newTheme);
+        localStorage.setItem('PrediX_theme', newTheme);
     };
 
     const updateUser = (updates) => {

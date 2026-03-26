@@ -11,7 +11,8 @@ const marketSchema = new mongoose.Schema({
         no: { type: Number, required: true, default: 0.5 }
     },
     status: { type: String, enum: ['live', 'resolved', 'cancelled'], default: 'live' },
-    resolution: { type: String, enum: ['yes', 'no', null], default: null },
+    outcome: { type: String, enum: ['yes', 'no', null], default: null },
+    resolved: { type: Boolean, default: false },
     endDate: { type: String, required: true },
     createdAt: { type: Date, default: Date.now }
 });

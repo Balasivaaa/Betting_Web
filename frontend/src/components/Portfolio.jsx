@@ -1,9 +1,34 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Wallet, TrendingUp, History } from 'lucide-react';
+import { Wallet, TrendingUp, History, Landmark } from 'lucide-react';
+import WithdrawModal from './WithdrawModal';
 
 const Portfolio = () => {
-    const { user, accountMode } = useAuth();
+    const { user, accountMode, updateUser } = useAuth();
+    const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+
+    const fetchLatestUser = async () => {
+        const token = localStorage.getItem('PrediX_token');
+        if (token) {
+            try {
+                const res = await fetch('/api/auth/me', {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    updateUser(data.user);
+                }
+            } catch (err) {
+                console.error('Portfolio refresh failed:', err);
+            }
+        }
+    };
+
+    useEffect(() => {
+        fetchLatestUser();
+        const interval = setInterval(fetchLatestUser, 15000);
+        return () => clearInterval(interval);
+    }, []);
 
     if (!user) return (
         <div style={{ textAlign: 'center', padding: '100px 20px', color: 'var(--text-muted)' }}>
@@ -30,9 +55,20 @@ const Portfolio = () => {
 
     return (
         <div className="portfolio-page fade-in">
-            <header className="page-header">
-                <h1 className="page-title">My Portfolio <span className={`badge-mode ${accountMode}`}>{accountMode.toUpperCase()}</span></h1>
-                <p className="page-subtitle">Manage your trades and track performance</p>
+            <header className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '20px' }}>
+                <div>
+                    <h1 className="page-title">My Portfolio <span className={`badge-mode ${accountMode}`}>{accountMode.toUpperCase()}</span></h1>
+                    <p className="page-subtitle">Manage your trades and track performance</p>
+                </div>
+                {accountMode === 'real' && (
+                    <button 
+                        className="trade-btn" 
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px' }}
+                        onClick={() => setShowWithdrawModal(true)}
+                    >
+                        <Landmark size={18} /> Withdraw Funds
+                    </button>
+                )}
             </header>
 
             <div className="portfolio-stats">
@@ -96,7 +132,47 @@ const Portfolio = () => {
                         </table>
                     </div>
                 </div>
+
+                {user.withdrawals && user.withdrawals.length > 0 && (
+                    <div className="content-card" style={{ marginTop: '32px' }}>
+                        <div className="card-header">
+                            <h3>Withdrawal History</h3>
+                        </div>
+                        <div className="table-wrapper">
+                            <table className="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Method</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {user.withdrawals.slice().reverse().map((w, idx) => (
+                                        <tr key={w._id || idx}>
+                                            <td>{new Date(w.createdAt).toLocaleDateString()}</td>
+                                            <td>₹{w.amount.toLocaleString()}</td>
+                                            <td>{w.method}</td>
+                                            <td>
+                                                <span className={`status-badge ${w.status}`}>
+                                                    {w.status.toUpperCase()}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
             </div>
+
+            <WithdrawModal 
+                isOpen={showWithdrawModal} 
+                onClose={() => setShowWithdrawModal(false)}
+                onRefresh={fetchLatestUser}
+            />
         </div>
     );
 };

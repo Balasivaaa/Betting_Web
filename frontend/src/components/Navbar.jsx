@@ -13,7 +13,7 @@ const Navbar = ({ currentPage, onNavigate }) => {
         { id: 'leaderboard', label: 'Leaderboard', icon: '🏆' }
     ];
 
-    if (user && user.email === 'admin@bharatx.com') {
+    if (user && user.email === 'admin@PrediX.com') {
         navLinks.push({ id: 'admin', label: 'Admin', icon: '⚙️' });
     }
 

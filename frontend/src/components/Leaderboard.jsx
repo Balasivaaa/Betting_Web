@@ -21,6 +21,8 @@ const Leaderboard = () => {
             }
         };
         fetchLeaderboard();
+        const interval = setInterval(fetchLeaderboard, 15000);
+        return () => clearInterval(interval);
     }, []);
 
     const leaderboardData = useMemo(() => {

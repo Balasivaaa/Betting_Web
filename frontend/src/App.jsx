@@ -1,21 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import MarketsGrid from './components/MarketsGrid';
-import Portfolio from './components/Portfolio';
-import Leaderboard from './components/Leaderboard';
 import AuthModal from './components/AuthModal';
 import TradeModal from './components/TradeModal';
 import DepositModal from './components/DepositModal';
-import Chatbot from './components/Chatbot';
-import AdminPanel from './components/AdminPanel';
 import { MessageSquare } from 'lucide-react';
+
+const Portfolio = React.lazy(() => import('./components/Portfolio'));
+const Leaderboard = React.lazy(() => import('./components/Leaderboard'));
+const Chatbot = React.lazy(() => import('./components/Chatbot'));
+const AdminPanel = React.lazy(() => import('./components/AdminPanel'));
 
 const AppContent = () => {
     const { user, login } = useAuth();
     const [currentPage, setCurrentPage] = useState('markets');
     
-    const isAdmin = user && user.email === 'admin@bharatx.com';
+    const isAdmin = user && user.email === 'admin@PrediX.com';
     
     // Modal states
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -60,20 +61,16 @@ const AppContent = () => {
             <main className="main-content">
                 {currentPage === 'markets' && <MarketsGrid onTrade={handleTrade} />}
                 
-                {currentPage === 'portfolio' && (
-                    <Portfolio />
-                )}
-                
-                {currentPage === 'leaderboard' && (
-                    <Leaderboard />
-                )}
-
-                {currentPage === 'admin' && isAdmin && (
-                    <AdminPanel />
-                )}
+                <Suspense fallback={<div style={{ display:'flex', justifyContent:'center', padding:'80px 0' }}><div className="animate-spin" style={{ width:32, height:32, border:'3px solid var(--border-color)', borderTop:'3px solid var(--primary-color)', borderRadius:'50%' }} /></div>}>
+                    {currentPage === 'portfolio' && <Portfolio />}
+                    {currentPage === 'leaderboard' && <Leaderboard />}
+                    {currentPage === 'admin' && isAdmin && <AdminPanel />}
+                </Suspense>
             </main>
 
-            <Chatbot />
+            <Suspense fallback={null}>
+                <Chatbot />
+            </Suspense>
             
             <div className="toast-container" id="toastContainer"></div>
 

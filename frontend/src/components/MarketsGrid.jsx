@@ -26,6 +26,8 @@ const MarketsGrid = ({ onTrade }) => {
         };
 
         fetchMarkets();
+        const interval = setInterval(fetchMarkets, 15000);
+        return () => clearInterval(interval);
     }, []);
 
     const filteredMarkets = useMemo(() => {
