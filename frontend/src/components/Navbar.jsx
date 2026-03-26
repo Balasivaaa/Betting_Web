@@ -21,8 +21,8 @@ const Navbar = ({ currentPage, onNavigate }) => {
         <nav className="navbar">
             <div className="nav-container">
                 <div className="logo" onClick={() => onNavigate('markets')}>
-                    <span className="logo-icon">B</span>
-                    <div className="logo-text">Bharat<span className="logo-accent">X</span></div>
+                    <span className="logo-icon">P</span>
+                    <div className="logo-text">Predi<span className="logo-accent">X</span></div>
                 </div>
 
                 <div className="nav-links">
