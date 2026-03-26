@@ -6,47 +6,77 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [accountMode, setAccountMode] = useState('paper'); // 'paper' | 'real'
+    const [accountMode, setAccountMode] = useState('demo'); // 'demo' | 'real'
     const [theme, setTheme] = useState('dark');
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Load user from localStorage on init
-        const savedUser = localStorage.getItem('bharatx_user');
-        if (savedUser) {
-            setUser(JSON.parse(savedUser));
-        }
-        
-        const savedMode = localStorage.getItem('bharatx_mode');
-        if (savedMode) {
+        const initAuth = async () => {
+            const token = localStorage.getItem('bharatx_token');
+            if (token) {
+                try {
+                    const res = await fetch('/api/auth/me', {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        setUser(data.user);
+                    } else {
+                        localStorage.removeItem('bharatx_token');
+                    }
+                } catch (error) {
+                    console.error('Session restoration failed:', error);
+                }
+            }
+            
+            const savedMode = localStorage.getItem('bharatx_mode') || 'demo';
             setAccountMode(savedMode);
-        }
 
-        const savedTheme = localStorage.getItem('bharatx_theme') || 'dark';
-        setTheme(savedTheme);
-        document.body.setAttribute('data-theme', savedTheme);
+            const savedTheme = localStorage.getItem('bharatx_theme') || 'dark';
+            setTheme(savedTheme);
+            document.body.setAttribute('data-theme', savedTheme);
+            
+            setLoading(false);
+        };
         
-        setLoading(false);
+        initAuth();
     }, []);
 
-    const login = (userData) => {
-        const fullUser = {
-            ...userData,
-            paperWallet: userData.paperWallet || 10000,
-            realWallet: userData.realWallet || 0,
-            joinedDate: userData.joinedDate || new Date().toISOString()
-        };
-        setUser(fullUser);
-        localStorage.setItem('bharatx_user', JSON.stringify(fullUser));
+    const login = async (email, password) => {
+        const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Login failed');
+        
+        localStorage.setItem('bharatx_token', data.token);
+        setUser(data.user);
+        return data.user;
+    };
+
+    const register = async (name, email, password) => {
+        const res = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Registration failed');
+        
+        localStorage.setItem('bharatx_token', data.token);
+        setUser(data.user);
+        return data.user;
     };
 
     const logout = () => {
         setUser(null);
-        localStorage.removeItem('bharatx_user');
+        localStorage.removeItem('bharatx_token');
     };
 
     const toggleAccountMode = () => {
-        const newMode = accountMode === 'paper' ? 'real' : 'paper';
+        const newMode = accountMode === 'demo' ? 'real' : 'demo';
         setAccountMode(newMode);
         localStorage.setItem('bharatx_mode', newMode);
     };
@@ -59,11 +89,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const updateUser = (updates) => {
-        setUser(prev => {
-            const newUser = { ...prev, ...updates };
-            localStorage.setItem('bharatx_user', JSON.stringify(newUser));
-            return newUser;
-        });
+        setUser(prev => ({ ...prev, ...updates }));
     };
 
     const value = {
@@ -72,6 +98,7 @@ export const AuthProvider = ({ children }) => {
         theme,
         loading,
         login,
+        register,
         logout,
         toggleAccountMode,
         toggleTheme,

@@ -51,7 +51,7 @@ const Navbar = ({ currentPage, onNavigate }) => {
                             <div className="wallet-info" onClick={() => onNavigate('deposit')}>
                                 <div className={`wallet-badge ${accountMode}`}>
                                     <Wallet size={14} style={{ marginRight: '6px' }} />
-                                    ₹{(accountMode === 'paper' ? user.paperWallet : user.realWallet).toLocaleString()}
+                                    ₹{((accountMode === 'demo' ? user.demoWallet : user.realWallet) || 0).toLocaleString()}
                                 </div>
                             </div>
                             

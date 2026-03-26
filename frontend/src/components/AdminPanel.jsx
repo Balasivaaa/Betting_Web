@@ -1,67 +1,91 @@
 import React, { useState, useEffect } from 'react';
-import { resolveMarket, createMarket, MARKETS_DATA, CATEGORIES } from '../utils/mockData';
-import { Plus, CheckCircle, AlertCircle, Users, BarChart2, Calendar, Tag, Info } from 'lucide-react';
+import { CATEGORIES } from '../utils/mockData';
+import { Plus, CheckCircle, AlertCircle, Users, BarChart2, Calendar, Tag, Info, Loader2 } from 'lucide-react';
 
 const AdminPanel = () => {
     const [markets, setMarkets] = useState([]);
-    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [newMarket, setNewMarket] = useState({
         question: '',
-        category: 'politics',
-        categoryEmoji: '🏛️',
-        endDate: ''
+        category: 'Politics',
+        endDate: '',
+        probability: { yes: 0.5, no: 0.5 }
     });
     const [message, setMessage] = useState(null);
 
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch('/api/markets');
+            const data = await res.json();
+            setMarkets(data);
+        } catch (err) {
+            console.error('Fetch error:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        // Load data from localStorage
-        const storedMarkets = JSON.parse(localStorage.getItem('bharatx_markets')) || MARKETS_DATA;
-        const storedUsers = JSON.parse(localStorage.getItem('bharatx_users')) || [];
-        setMarkets(storedMarkets);
-        setUsers(storedUsers);
+        fetchData();
     }, []);
 
-    const handleResolve = (marketId, outcome) => {
-        const result = resolveMarket(marketId, outcome);
-        if (result.success) {
-            setMessage({ type: 'success', text: result.message });
-            // Refresh markets
-            setMarkets(JSON.parse(localStorage.getItem('bharatx_markets')));
-        } else {
-            setMessage({ type: 'error', text: result.message });
+    const handleResolve = async (marketId, outcome) => {
+        try {
+            const token = localStorage.getItem('bharatx_token');
+            const res = await fetch('/api/markets/resolve', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ marketId, outcome })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setMessage({ type: 'success', text: data.message });
+                fetchData();
+            } else {
+                setMessage({ type: 'error', text: data.error });
+            }
+        } catch (err) {
+            setMessage({ type: 'error', text: 'Operation failed' });
         }
     };
 
-    const handleCreateMarket = (e) => {
+    const handleCreateMarket = async (e) => {
         e.preventDefault();
-        const emojiMap = {
-            politics: '🏛️',
-            cricket: '🏏',
-            economy: '📈',
-            bollywood: '🎬',
-            sports: '⚽',
-            startups: '🚀'
-        };
-        
-        const result = createMarket({
-            ...newMarket,
-            categoryEmoji: emojiMap[newMarket.category] || '🎯'
-        });
-
-        if (result.success) {
-            setMessage({ type: 'success', text: 'Market created successfully!' });
-            setMarkets(JSON.parse(localStorage.getItem('bharatx_markets')));
-            setShowCreateForm(false);
-            setNewMarket({ question: '', category: 'politics', categoryEmoji: '🏛️', endDate: '' });
+        try {
+            const token = localStorage.getItem('bharatx_token');
+            const res = await fetch('/api/markets', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(newMarket)
+            });
+            if (res.ok) {
+                setMessage({ type: 'success', text: 'Market created successfully!' });
+                fetchData();
+                setShowCreateForm(false);
+                setNewMarket({ question: '', category: 'Politics', endDate: '', probability: { yes: 0.5, no: 0.5 } });
+            } else {
+                const data = await res.json();
+                setMessage({ type: 'error', text: data.error || 'Creation failed' });
+            }
+        } catch (err) {
+            setMessage({ type: 'error', text: 'Creation failed' });
         }
     };
+
+    if (loading && markets.length === 0) return <div style={{ padding: '100px', textAlign: 'center' }}><Loader2 className="animate-spin" /></div>;
 
     const stats = {
         totalMarkets: markets.length,
         activeMarkets: markets.filter(m => !m.resolved).length,
         resolvedMarkets: markets.filter(m => m.resolved).length,
-        totalUsers: users.length
     };
 
     return (
@@ -86,30 +110,23 @@ const AdminPanel = () => {
             <div className="portfolio-stats">
                 <div className="portfolio-stat-card blue">
                     <div className="stat-icon-wrapper"><BarChart2 size={24} /></div>
-                    <div>
+                    <div className="stat-info">
                         <span className="stat-label">Total Markets</span>
                         <span className="stat-value">{stats.totalMarkets}</span>
                     </div>
                 </div>
                 <div className="portfolio-stat-card purple">
                     <div className="stat-icon-wrapper"><Calendar size={24} /></div>
-                    <div>
+                    <div className="stat-info">
                         <span className="stat-label">Active</span>
                         <span className="stat-value">{stats.activeMarkets}</span>
                     </div>
                 </div>
                 <div className="portfolio-stat-card green">
                     <div className="stat-icon-wrapper"><CheckCircle size={24} /></div>
-                    <div>
+                    <div className="stat-info">
                         <span className="stat-label">Resolved</span>
                         <span className="stat-value">{stats.resolvedMarkets}</span>
-                    </div>
-                </div>
-                <div className="portfolio-stat-card cyan">
-                    <div className="stat-icon-wrapper"><Users size={24} /></div>
-                    <div>
-                        <span className="stat-label">Total Users</span>
-                        <span className="stat-value">{stats.totalUsers}</span>
                     </div>
                 </div>
             </div>
@@ -131,17 +148,17 @@ const AdminPanel = () => {
                         </thead>
                         <tbody>
                             {markets.map(market => (
-                                <tr key={market.id}>
+                                <tr key={market._id}>
                                     <td className="market-cell">{market.question}</td>
                                     <td>
-                                        <span className={`category-tag ${market.category}`}>
-                                            {market.categoryEmoji} {market.category}
+                                        <span className={`category-tag ${market.category?.toLowerCase() || 'general'}`}>
+                                            {market.category}
                                         </span>
                                     </td>
-                                    <td>₹{market.volume.toLocaleString()}</td>
+                                    <td>₹{(market.volume || 0).toLocaleString()}</td>
                                     <td>
                                         {market.resolved ? (
-                                            <span className="status-badge resolved">Resolved ({market.outcome.toUpperCase()})</span>
+                                            <span className="status-badge resolved">Resolved ({market.outcome?.toUpperCase()})</span>
                                         ) : (
                                             <span className="status-badge active">Active</span>
                                         )}
@@ -149,8 +166,8 @@ const AdminPanel = () => {
                                     <td>
                                         {!market.resolved && (
                                             <div className="admin-actions">
-                                                <button className="action-btn yes" onClick={() => handleResolve(market.id, 'yes')}>Yes</button>
-                                                <button className="action-btn no" onClick={() => handleResolve(market.id, 'no')}>No</button>
+                                                <button className="action-btn yes" onClick={() => handleResolve(market._id, 'yes')}>Yes</button>
+                                                <button className="action-btn no" onClick={() => handleResolve(market._id, 'no')}>No</button>
                                             </div>
                                         )}
                                     </td>
@@ -161,14 +178,12 @@ const AdminPanel = () => {
                 </div>
             </div>
 
-            {/* Create Market Modal Overlay */}
             {showCreateForm && (
                 <div className="modal-overlay">
                     <div className="modal" style={{ maxWidth: '500px' }}>
                         <button className="modal-close" onClick={() => setShowCreateForm(false)}>×</button>
                         <header className="modal-header">
                             <h2 className="modal-title">Create Market</h2>
-                            <p className="modal-subtitle">Add a new prediction event</p>
                         </header>
                         <form onSubmit={handleCreateMarket}>
                             <div className="form-group">

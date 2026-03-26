@@ -4,25 +4,28 @@ import { useAuth } from '../context/AuthContext';
 import { User, Lock, Mail, ChevronRight } from 'lucide-react';
 
 const AuthModal = ({ isOpen, onClose }) => {
-    const { login } = useAuth();
+    const { login, register } = useAuth();
     const [isLogin, setIsLogin] = useState(true);
     const [formData, setFormData] = useState({ name: '', email: '', password: '' });
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setIsLoading(true);
 
-        if (isLogin) {
-            if (formData.email === 'demo@bharatx.com' && formData.password === 'demo123') {
-                login({ name: 'Bharat Trader', email: formData.email });
-                onClose();
+        try {
+            if (isLogin) {
+                await login(formData.email, formData.password);
             } else {
-                setError('Invalid credentials. Hint: demo@bharatx.com / demo123');
+                await register(formData.name, formData.email, formData.password);
             }
-        } else {
-            login({ name: formData.name, email: formData.email });
             onClose();
+        } catch (err) {
+            setError(err.message || 'Authentication failed');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -76,15 +79,15 @@ const AuthModal = ({ isOpen, onClose }) => {
                             placeholder="Minimum 6 characters" 
                             value={formData.password}
                             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                            required 
+                            required={!isLogin} 
                         />
                     </div>
                 </div>
 
                 {error && <div className="form-error visible">{error}</div>}
 
-                <button type="submit" className="btn btn-primary btn-block" style={{ marginTop: '12px', fontWeight: '800' }}>
-                    Submit
+                <button type="submit" className="btn btn-primary btn-block" style={{ marginTop: '12px', fontWeight: '800' }} disabled={isLoading}>
+                    {isLoading ? 'Processing...' : 'Submit'}
                     <ChevronRight size={18} style={{ marginLeft: '8px' }} />
                 </button>
 

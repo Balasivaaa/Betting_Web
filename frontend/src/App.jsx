@@ -21,7 +21,7 @@ const AppContent = () => {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
     const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
-    const [selectedMarketId, setSelectedMarketId] = useState(null);
+    const [selectedMarket, setSelectedMarket] = useState(null);
     const [selectedTradeSide, setSelectedTradeSide] = useState('yes');
 
     const handleNavigate = (page) => {
@@ -40,12 +40,12 @@ const AppContent = () => {
         }
     }, [user, currentPage]);
 
-    const handleTrade = (id, side) => {
+    const handleTrade = (market, side) => {
         if (!user) {
             setIsAuthModalOpen(true);
             return;
         }
-        setSelectedMarketId(id);
+        setSelectedMarket(market);
         setSelectedTradeSide(side);
         setIsTradeModalOpen(true);
     };
@@ -86,7 +86,7 @@ const AppContent = () => {
             <TradeModal 
                 isOpen={isTradeModalOpen} 
                 onClose={() => setIsTradeModalOpen(false)} 
-                marketId={selectedMarketId}
+                market={selectedMarket}
                 initialSide={selectedTradeSide}
             />
 

@@ -24,7 +24,7 @@ const DepositModal = ({ isOpen, onClose }) => {
             const order = response.data;
             
             const options = {
-                key: "rzp_test_SVW7hT0apunCG2", 
+                key: import.meta.env.VITE_RAZORPAY_KEY_ID, 
                 amount: order.amount,
                 currency: order.currency,
                 name: "BharatX",
@@ -36,11 +36,13 @@ const DepositModal = ({ isOpen, onClose }) => {
                         const verifyRes = await axios.post('/api/verify-payment', {
                             razorpay_order_id: response.razorpay_order_id,
                             razorpay_payment_id: response.razorpay_payment_id,
-                            razorpay_signature: response.razorpay_signature
+                            razorpay_signature: response.razorpay_signature,
+                            userId: user._id,
+                            amount: amount * 100 // passing paise to match Razorpay unit
                         });
 
                         if (verifyRes.data.status === 'success') {
-                            updateUser({ realWallet: (user.realWallet || 0) + amount });
+                            updateUser(verifyRes.data.user); // Update local user state with data from DB
                             
                             // 3. Send confirmation email
                             await axios.post('/api/send-confirmation-email', {

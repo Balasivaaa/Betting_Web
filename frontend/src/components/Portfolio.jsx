@@ -1,26 +1,30 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Wallet, TrendingUp, History, User } from 'lucide-react';
-import { formatVolume } from '../utils/mockData';
+import { Wallet, TrendingUp, History } from 'lucide-react';
 
 const Portfolio = () => {
     const { user, accountMode } = useAuth();
 
-    if (!user) return null;
+    if (!user) return (
+        <div style={{ textAlign: 'center', padding: '100px 20px', color: 'var(--text-muted)' }}>
+            <h2>Please sign in to view your portfolio</h2>
+        </div>
+    );
 
-    const positions = user.positions || [];
-    const walletBalance = accountMode === 'paper' ? user.paperWallet : user.realWallet;
+    const portfolio = user.portfolio || [];
+    const walletBalance = accountMode === 'demo' ? (user.demoWallet || 0) : (user.realWallet || 0);
     
-    // Calculate Total Invested and Current Value
-    const totalInvested = positions.reduce((acc, pos) => acc + (pos.shares * pos.avgPrice), 0);
-    const currentValue = positions.reduce((acc, pos) => acc + (pos.shares * (pos.currentPrice || pos.avgPrice)), 0);
+    // Calculate stats from live portfolio data
+    const totalInvested = portfolio.reduce((acc, pos) => acc + (pos.totalInvested || 0), 0);
+    const currentValue = portfolio.reduce((acc, pos) => acc + (pos.shares * (pos.currentPrice || pos.avgPrice || 0)), 0);
     const totalPnL = currentValue - totalInvested;
     const roi = totalInvested > 0 ? (totalPnL / totalInvested) * 100 : 0;
+    const totalPortfolioValue = walletBalance + currentValue;
 
     const stats = [
-        { label: 'Total Value', value: walletBalance + currentValue, icon: <Wallet size={20} />, color: 'blue' },
+        { label: 'Total Value', value: totalPortfolioValue, icon: <Wallet size={20} />, color: 'blue' },
         { label: 'Net P&L', value: totalPnL, icon: <TrendingUp size={20} />, color: totalPnL >= 0 ? 'green' : 'red' },
-        { label: 'Active Positions', value: positions.length.toString(), icon: <History size={20} />, color: 'purple' },
+        { label: 'Active Positions', value: portfolio.length.toString(), icon: <History size={20} />, color: 'purple' },
         { label: 'Return (ROI)', value: `${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%`, icon: <TrendingUp size={20} />, color: 'cyan' }
     ];
 
@@ -35,20 +39,12 @@ const Portfolio = () => {
                 {stats.map((stat, idx) => (
                     <div key={idx} className={`portfolio-stat-card ${stat.color} stagger-${idx+1}`}>
                         <div className="stat-icon-wrapper">{stat.icon}</div>
-                        {stat.label === 'Total Value' ? (
-                            <div className="stat-card main">
-                                <span className="stat-label">Total Portfolio Value</span>
-                                <h2 className="portfolio-value">₹{totalValue.toLocaleString()}</h2>
-                                <div className={`stat-change ${netPnL >= 0 ? 'positive' : 'negative'}`}>
-                                    {netPnL >= 0 ? '+' : ''}₹{netPnL.toLocaleString()} ({netPnL >= 0 ? '+' : ''}{roi.toFixed(2)}%)
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="stat-info">
-                                <span className="stat-label">{stat.label}</span>
-                                <span className="stat-value">{typeof stat.value === 'number' ? `₹${stat.value.toLocaleString()}` : stat.value}</span>
-                            </div>
-                        )}
+                        <div className="stat-info">
+                            <span className="stat-label">{stat.label}</span>
+                            <span className="stat-value">
+                                {typeof stat.value === 'number' ? `₹${stat.value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : stat.value}
+                            </span>
+                        </div>
                     </div>
                 ))}
             </div>
@@ -72,24 +68,27 @@ const Portfolio = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {positions.length > 0 ? positions.map(pos => {
-                                    const pnl = (pos.shares * (pos.currentPrice || pos.avgPrice)) - (pos.shares * pos.avgPrice);
+                                {portfolio.length > 0 ? portfolio.map((pos, idx) => {
+                                    const currentPrice = pos.currentPrice || pos.avgPrice;
+                                    const pnl = (pos.shares * currentPrice) - pos.totalInvested;
                                     return (
-                                        <tr key={pos.marketId}>
-                                            <td className="market-cell">{pos.marketQuestion}</td>
+                                        <tr key={pos.marketId || idx}>
+                                            <td className="market-cell">{pos.question || 'Prediction Market'}</td>
                                             <td><span className={`badge ${pos.side.toLowerCase()}`}>{pos.side.toUpperCase()}</span></td>
-                                            <td>{pos.shares}</td>
+                                            <td>{pos.shares.toFixed(2)}</td>
                                             <td>₹{pos.avgPrice.toFixed(2)}</td>
-                                            <td>₹{(pos.currentPrice || pos.avgPrice).toFixed(2)}</td>
+                                            <td>₹{currentPrice.toFixed(2)}</td>
                                             <td className={pnl >= 0 ? 'green' : 'red'}>
-                                                {pnl >= 0 ? '+' : ''}₹{pnl.toFixed(1)}
+                                                {pnl >= 0 ? '+' : ''}₹{pnl.toFixed(2)}
                                             </td>
                                         </tr>
                                     );
                                 }) : (
                                     <tr>
-                                        <td colSpan="6" className="empty-row" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
-                                            No active positions
+                                        <td colSpan="6" className="empty-row" style={{ textAlign: 'center', padding: '100px', color: 'var(--text-muted)' }}>
+                                            <div style={{ fontSize: '3rem', marginBottom: '15px' }}>📈</div>
+                                            <h3>No active positions</h3>
+                                            <p>Your trades will appear here once you place them</p>
                                         </td>
                                     </tr>
                                 )}
